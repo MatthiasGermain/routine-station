@@ -50,9 +50,13 @@ SensorReadings sensorsRead() {
       readAverageMilliVolts(PIN_LIGHT) * 100 / LIGHT_FULL_SCALE_MILLIVOLTS;
   readings.lightPercent = lightPercent > 100 ? 100 : lightPercent;
 
-  // Kept raw on purpose: the flame threshold will be chosen from these values
-  // at step 2.
-  readings.flameMilliVolts = readAverageMilliVolts(PIN_FLAME);
-
   return readings;
+}
+
+uint32_t sensorsReadFlameMilliVolts() {
+  return analogReadMilliVolts(PIN_FLAME);
+}
+
+uint32_t sensorsReadLightMilliVolts() {
+  return analogReadMilliVolts(PIN_LIGHT);
 }

@@ -5,6 +5,9 @@
 .vscode/*
 !.vscode/extensions.json
 
+# Serial monitor logs (pio device monitor -f log2file)
+logs/
+
 # Secrets: Wi-Fi password, broker credentials, certificates. Never commit.
 include/secrets.h
 

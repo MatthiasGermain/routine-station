@@ -23,3 +23,8 @@ const uint8_t PIN_MOTOR_IN1 = 19;
 const uint8_t PIN_MOTOR_IN2 = 18;
 const uint8_t PIN_MOTOR_IN3 = 17;  // labelled TX2 on the board
 const uint8_t PIN_MOTOR_IN4 = 16;  // labelled RX2 on the board
+
+// Flame alarm outputs.
+const uint8_t PIN_ALARM_LED = 26;  // red LED through a 220 ohm resistor
+const uint8_t PIN_BUZZER = 27;     // active buzzer, driven directly (loud
+                                   // enough at 3.3 V)
