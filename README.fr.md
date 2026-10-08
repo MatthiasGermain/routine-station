@@ -8,7 +8,7 @@ qu'une page web les affiche en direct et renvoie des ordres. Quand une flamme
 est détectée, l'alarme et l'arrêt du moteur sont gérés sur la carte en temps
 réel, avec ou sans réseau.
 
-**État :** étape 1 sur 6 terminée (capteurs et moteur en local). Voir la
+**État :** étape 2 sur 6 terminée (alarme flamme temps réel, mesurée). Voir la
 [feuille de route](#feuille-de-route).
 
 ## Démo
@@ -81,10 +81,32 @@ Une note courte par décision importante, dans
 [docs/decisions/](docs/decisions/) :
 
 - [0001 : PlatformIO et le framework Arduino](docs/decisions/0001-platformio-arduino.md)
+- [0002 : un pilote maison pour le moteur pas-à-pas](docs/decisions/0002-pilote-moteur-maison.md)
+- [0003 : l'alarme flamme dans une tâche FreeRTOS](docs/decisions/0003-alarme-tache-freertos.md)
+- [0004 : distinguer une flamme de la lumière du jour](docs/decisions/0004-flamme-ou-lumiere-du-jour.md)
 
 ## Garanties temps réel
 
-_À l'étape 2, avec le temps de réaction mesuré de l'alarme flamme._
+L'alarme flamme tourne dans sa propre tâche FreeRTOS, de priorité plus haute
+que `loop()`. Elle lit les capteurs toutes les 2 ms et, sur une flamme, allume
+la LED et le buzzer et bloque le moteur sans passer par `loop()`. Un chien de
+garde redémarre la carte si la tâche s'arrête. Mesuré sur la carte :
+
+| Mesure | Résultat |
+|--------|----------|
+| Période d'échantillonnage | 2,000 ms en moyenne, toujours entre 1,69 et 2,26 ms, même quand `loop()` est bloquée |
+| Début de la flamme → alarme | 88 ms ; 72 ms avec `loop()` bloquée 500 ms à chaque tour |
+| Même vérification dans une `loop()` bloquée | vue seulement après 127 ms dans l'essai, jusqu'à 500 ms |
+| Fausses alarmes | aucune sur les ombres et les mains |
+
+![Captures brutes des capteurs : ombre, main, briquet, briquet avec loop() bloquée](docs/assets/02-alarme-flamme.png)
+
+Le capteur infrarouge nu voit aussi la lumière du jour : la photorésistance sert
+de référence pour distinguer une flamme d'un changement d'éclairage
+([décision 0004](docs/decisions/0004-flamme-ou-lumiere-du-jour.md)). Les seuils
+ont été choisis en enregistrant les signaux bruts puis en les rejouant sur
+l'algorithme. Limites connues : environ 20 cm de portée en plein jour, voir le
+[journal de l'étape 2](docs/journal/02-alarme-flamme.md).
 
 ## Modèle de sécurité
 
@@ -106,7 +128,7 @@ _Mis en place aux étapes 3 et 5._ La conception :
   squelette, conventions (`v0.0-setup`)
 - [x] **Étape 1, capteurs et moteur en local** : tout fonctionne, résultats dans
   le moniteur série (`v0.1-sensors`)
-- [ ] **Étape 2, alarme flamme temps réel** : tâche dédiée à haute priorité,
+- [x] **Étape 2, alarme flamme temps réel** : tâche dédiée à haute priorité,
   temps de réaction mesuré (`v0.2-alarm`)
 - [ ] **Étape 3, broker cloud** : Wi-Fi, MQTT en TLS, reconnexion automatique,
   envoi des mesures, réception des commandes (`v0.3-mqtt`)
