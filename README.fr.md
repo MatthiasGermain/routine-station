@@ -8,7 +8,7 @@ qu'une page web les affiche en direct et renvoie des ordres. Quand une flamme
 est détectée, l'alarme et l'arrêt du moteur sont gérés sur la carte en temps
 réel, avec ou sans réseau.
 
-**État :** étape 0 sur 6 terminée (dépôt et chaîne de compilation). Voir la
+**État :** étape 1 sur 6 terminée (capteurs et moteur en local). Voir la
 [feuille de route](#feuille-de-route).
 
 ## Démo
@@ -53,13 +53,12 @@ Tout vient d'un kit de démarrage Arduino UNO, plus une carte ESP32.
 |-----------|------|
 | ESP32 DevKit V1 (ESP32-WROOM-32, 30 broches) | Microcontrôleur, Wi-Fi |
 | LM35 | Température |
-| Photorésistance | Lumière ambiante |
-| Module capteur de flamme | Détection de flamme |
+| Photorésistance + résistance 10 kΩ | Lumière ambiante |
+| Capteur de flamme infrarouge + résistance 10 kΩ | Détection de flamme |
 | Moteur pas-à-pas 28BYJ-48 + driver ULN2003 | Moteur |
 | LED, buzzer | Alarme |
 
-Câblage broche par broche : [docs/wiring.md](docs/wiring.md) (rempli à partir de
-l'étape 1).
+Câblage broche par broche : [docs/wiring.md](docs/wiring.md).
 
 ## Fonctionnement
 
@@ -105,7 +104,7 @@ _Mis en place aux étapes 3 et 5._ La conception :
 
 - [x] **Étape 0, mise en place** : structure du dépôt, PlatformIO, README
   squelette, conventions (`v0.0-setup`)
-- [ ] **Étape 1, capteurs et moteur en local** : tout fonctionne, résultats dans
+- [x] **Étape 1, capteurs et moteur en local** : tout fonctionne, résultats dans
   le moniteur série (`v0.1-sensors`)
 - [ ] **Étape 2, alarme flamme temps réel** : tâche dédiée à haute priorité,
   temps de réaction mesuré (`v0.2-alarm`)

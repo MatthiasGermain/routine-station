@@ -7,7 +7,7 @@ and streams its measurements to a cloud MQTT broker, while a web page shows them
 live and sends commands back. When a flame is detected, the alarm and the motor
 stop are handled on the board in real time, with or without a network.
 
-**Status:** step 0 of 6 done (repository and toolchain). See the
+**Status:** step 1 of 6 done (sensors and motor working locally). See the
 [roadmap](#roadmap).
 
 ## Demo
@@ -52,13 +52,12 @@ Everything comes from an Arduino UNO starter kit plus an ESP32 board.
 |------|------|
 | ESP32 DevKit V1 (ESP32-WROOM-32, 30 pins) | Microcontroller, Wi-Fi |
 | LM35 | Temperature |
-| Photoresistor | Ambient light |
-| Flame sensor module | Flame detection |
+| Photoresistor + 10 kΩ resistor | Ambient light |
+| Infrared flame sensor + 10 kΩ resistor | Flame detection |
 | 28BYJ-48 stepper motor + ULN2003 driver | Motor |
 | LED, buzzer | Alarm |
 
-Pin-by-pin wiring: [docs/wiring.md](docs/wiring.md) (in French, filled in from
-step 1).
+Pin-by-pin wiring: [docs/wiring.md](docs/wiring.md) (in French).
 
 ## How it works
 
@@ -103,7 +102,7 @@ _Implemented at steps 3 and 5._ The design:
 
 - [x] **Step 0, setup**: repository structure, PlatformIO, README skeleton,
   conventions (`v0.0-setup`)
-- [ ] **Step 1, local sensors and motor**: everything works, results on the
+- [x] **Step 1, local sensors and motor**: everything works, results on the
   serial monitor (`v0.1-sensors`)
 - [ ] **Step 2, real-time flame alarm**: dedicated high-priority task, measured
   reaction time (`v0.2-alarm`)
