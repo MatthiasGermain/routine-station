@@ -10,9 +10,14 @@ recruteur : on comprend le projet en 30 secondes et on peut suivre sa
 construction étape par étape.
 
 Un ESP32 lit des capteurs, pilote un moteur et envoie ses mesures à un broker
-MQTT dans le cloud (HiveMQ Cloud, offre gratuite). Une page `/routine` du site de
-Matthias (Next.js + TypeScript + React, hébergé sur Vercel, **dans un autre
-repo**) affiche les mesures en direct et permet d'envoyer des ordres.
+MQTT dans le cloud (HiveMQ Cloud, offre gratuite). Une section « Station » de la
+page `/routine` du site de Matthias affiche les mesures en direct et permet
+d'envoyer des ordres.
+
+Le site est **dans un autre repo**, `portfolio` (Astro + TypeScript, hébergé sur
+Vercel). La page `/routine` y existe déjà : c'est le tableau de bord personnel
+de Matthias (planning de la journée, tâches Notion en cours). La station y
+ajoute une section, elle ne remplace rien.
 
 - **Mesures** : température (LM35), lumière (photorésistance), flamme (module
   capteur de flamme)
@@ -25,9 +30,9 @@ repo**) affiche les mesures en direct et permet d'envoyer des ordres.
 - **Sécurité** :
   - le broker a deux accès : lecture seule (utilisé par la page, visible par
     tous) et commande (utilisé uniquement par une route API Vercel côté serveur)
-  - la route API vérifie que Matthias est connecté (Auth.js, connexion GitHub
-    limitée à son compte) et valide chaque commande (type autorisé, valeurs dans
-    les bornes)
+  - la route API vérifie que Matthias est connecté (Auth.js ou équivalent pour
+    Astro, à choisir à l'étape 5 ; connexion GitHub limitée à son compte) et
+    valide chaque commande (type autorisé, valeurs dans les bornes)
   - l'ESP32 valide aussi chaque commande reçue et se connecte au broker en TLS
 
 ## Contraintes
@@ -55,12 +60,16 @@ repo**) affiche les mesures en direct et permet d'envoyer des ordres.
 | 1 | Capteurs et moteur en local, résultats dans le moniteur série | `v0.1-sensors` |
 | 2 | Alarme flamme temps réel : tâche FreeRTOS haute priorité (ou interruption), temps de réaction mesuré et documenté | `v0.2-alarm` |
 | 3 | Connexion au broker cloud : Wi-Fi, MQTT en TLS, reconnexion automatique, publication des mesures, réception des commandes | `v0.3-mqtt` |
-| 4 | Page `/routine` : affichage en direct (dans le repo du site) | `v0.4-live-page` |
-| 5 | Commandes depuis le web : route API protégée par login | `v0.5-commands` |
+| 4 | Section « Station » de la page `/routine` : affichage en direct (dans le repo `portfolio`) | `v0.4-live-page` |
+| 5 | Commandes depuis le web : route API protégée par login (dans le repo `portfolio`) | `v0.5-commands` |
 | 6 | Finition : README complet, schéma de câblage, GIF/vidéo de démo, bilan | `v1.0` |
 
 L'étape en cours se lit dans la feuille de route du [README](README.md#roadmap)
 et dans le dernier fichier de `docs/journal/`.
+
+Les étapes 4 et 5 se codent dans `portfolio`, mais leur tag est posé **ici**,
+sur le commit qui met à jour la feuille de route, le journal de l'étape et, si
+besoin, `docs/protocol.md`. Le journal renvoie vers les commits du site.
 
 ## Organisation du repo
 
