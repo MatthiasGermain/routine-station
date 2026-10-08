@@ -19,8 +19,10 @@ Vercel). La page `/routine` y existe déjà : c'est le tableau de bord personnel
 de Matthias (planning de la journée, tâches Notion en cours). La station y
 ajoute une section, elle ne remplace rien.
 
-- **Mesures** : température (LM35), lumière (photorésistance), flamme (module
-  capteur de flamme)
+- **Mesures** : température (LM35), lumière (photorésistance + 10 kΩ), flamme
+  (récepteur infrarouge nu à 2 pattes + 10 kΩ : pas de module, **pas de sortie
+  numérique**, donc pas d'interruption matérielle possible, le seuil se fait en
+  logiciel)
 - **Actions** : moteur pas-à-pas 28BYJ-48 via driver ULN2003, LED, buzzer
 - **Ordres depuis le web** : faire tourner / arrêter le moteur, déclencher /
   couper l'alarme, régler des seuils
@@ -38,8 +40,9 @@ ajoute une section, elle ne remplace rien.
 ## Contraintes
 
 - **Matériel** : uniquement ce que Matthias possède déjà, rien à acheter. Un kit
-  Arduino UNO (UNO, capteurs, moteur + ULN2003, LED, buzzers, LCD 1602, boutons,
-  résistances, breadboards) et deux ESP32. Pour l'instant **un seul ESP32** ; le
+  Arduino UNO (UNO, capteurs, moteur + ULN2003, LED, buzzer actif, LCD 1602,
+  boutons, résistances, breadboards, module d'alimentation 3,3 V/5 V pour
+  breadboard) et deux ESP32. Pour l'instant **un seul ESP32** ; le
   second et l'UNO sont des évolutions possibles plus tard.
 - **Carte** : ESP32 DevKit V1, 30 broches (ESP32-WROOM-32), board PlatformIO
   `esp32doit-devkit-v1`. LED intégrée sur GPIO2.
@@ -58,7 +61,7 @@ ajoute une section, elle ne remplace rien.
 |---|-------|-----|
 | 0 | Mise en place : structure du repo, PlatformIO, README squelette, conventions | `v0.0-setup` |
 | 1 | Capteurs et moteur en local, résultats dans le moniteur série | `v0.1-sensors` |
-| 2 | Alarme flamme temps réel : tâche FreeRTOS haute priorité (ou interruption), temps de réaction mesuré et documenté | `v0.2-alarm` |
+| 2 | Alarme flamme temps réel : tâche FreeRTOS haute priorité qui surveille le capteur, temps de réaction mesuré et documenté | `v0.2-alarm` |
 | 3 | Connexion au broker cloud : Wi-Fi, MQTT en TLS, reconnexion automatique, publication des mesures, réception des commandes | `v0.3-mqtt` |
 | 4 | Section « Station » de la page `/routine` : affichage en direct (dans le repo `portfolio`) | `v0.4-live-page` |
 | 5 | Commandes depuis le web : route API protégée par login (dans le repo `portfolio`) | `v0.5-commands` |
