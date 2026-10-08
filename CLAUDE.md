@@ -10,7 +10,9 @@ recruteur : on comprend le projet en 30 secondes et on peut suivre sa
 construction étape par étape.
 
 Un ESP32 lit des capteurs, pilote un moteur et envoie ses mesures à un broker
-MQTT dans le cloud (HiveMQ Cloud, offre gratuite). Une section « Station » de la
+MQTT dans le cloud (EMQX Serverless, offre gratuite : l'offre gratuite de
+HiveMQ Cloud prévue au départ a été arrêtée, voir la décision 0005). Une
+section « Station » de la
 page `/routine` du site de Matthias affiche les mesures en direct et permet
 d'envoyer des ordres.
 
@@ -30,8 +32,10 @@ ajoute une section, elle ne remplace rien.
   même si le Wi-Fi ou le broker sont indisponibles. **La sécurité locale ne
   dépend jamais du réseau.**
 - **Sécurité** :
-  - le broker a deux accès : lecture seule (utilisé par la page, visible par
-    tous) et commande (utilisé uniquement par une route API Vercel côté serveur)
+  - le broker a trois utilisateurs, avec des droits par topic (détail dans
+    `docs/protocol.md`) : `station` (l'ESP32), `web-viewer` en lecture seule
+    (utilisé par la page, son mot de passe est donc public) et `web-command`
+    (utilisé uniquement par une route API Vercel côté serveur)
   - la route API vérifie que Matthias est connecté (Auth.js ou équivalent pour
     Astro, à choisir à l'étape 5 ; connexion GitHub limitée à son compte) et
     valide chaque commande (type autorisé, valeurs dans les bornes)
@@ -143,3 +147,5 @@ Touches dans le moniteur série (firmware depuis l'étape 2) :
   toutes les 2 ms) puis les affiche en CSV. Lancer le moniteur avec
   `-f log2file` pour que Claude puisse lire le fichier dans `logs/`.
 - `s` : active ou coupe l'expérience « `loop()` bloquée 500 ms à chaque tour ».
+- `n` (depuis l'étape 3) : coupe le Wi-Fi de l'ESP32 pendant 60 s, comme une
+  panne réseau, puis le laisse se reconnecter seul.
