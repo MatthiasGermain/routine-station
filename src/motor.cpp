@@ -24,20 +24,25 @@ const uint8_t HALF_STEP_SEQUENCE[PHASE_COUNT][4] = {
 
 // Time between two half-steps. Below about 1 ms the 28BYJ-48 starts missing
 // steps; 2 ms gives one turn in about 8 seconds.
-const unsigned long HALF_STEP_INTERVAL_US = 2000;
+const TickType_t STEP_PERIOD_TICKS = pdMS_TO_TICKS(2);
 
-// loop() drives the motor, and the alarm task can interrupt loop() at any
-// moment to stop it. Every access to the state below happens inside a
-// critical section on this spinlock, so the alarm can never slip in between
-// "a step is due" and "energize the coils", which would turn them back on
-// right after the alarm turned them off.
+// Priority above loop() (1), so a blocked loop() does not stop the motor, and
+// below the alarm task (10), which must always come first. Pinned to core 1,
+// like them.
+const UBaseType_t TASK_PRIORITY = 5;
+const BaseType_t TASK_CORE = 1;
+const uint32_t TASK_STACK_BYTES = 2048;
+
+// The motor task steps the motor, loop() starts and stops it on command, and
+// the alarm task can lock it at any moment. Every access to the state below
+// happens inside a critical section on this spinlock, so the alarm can never
+// slip in between "the motor is running" and "energize the coils", which
+// would turn them back on right after the alarm turned them off.
 portMUX_TYPE stateLock = portMUX_INITIALIZER_UNLOCKED;
 
-uint8_t phase = 0;          // current row of HALF_STEP_SEQUENCE
-long remainingSteps = 0;    // half-steps left in the current move
-int8_t direction = 0;       // +1 forward, -1 backward, 0 stopped
-bool locked = false;        // set by the alarm: no move allowed
-unsigned long lastStepUs = 0;
+uint8_t phase = 0;      // current row of HALF_STEP_SEQUENCE
+int8_t direction = 0;   // +1 forward, -1 backward, 0 stopped
+bool locked = false;    // set by the alarm: running not allowed
 
 void applyPhase() {
   for (uint8_t coil = 0; coil < 4; coil++) {
@@ -55,9 +60,22 @@ void releaseCoils() {
 
 // Must be called inside the critical section.
 void stopNow() {
-  remainingSteps = 0;
   direction = 0;
   releaseCoils();
+}
+
+void motorTask(void *) {
+  TickType_t lastWake = xTaskGetTickCount();
+  for (;;) {
+    vTaskDelayUntil(&lastWake, STEP_PERIOD_TICKS);
+
+    portENTER_CRITICAL(&stateLock);
+    if (direction != 0) {
+      phase = (phase + direction + PHASE_COUNT) % PHASE_COUNT;
+      applyPhase();
+    }
+    portEXIT_CRITICAL(&stateLock);
+  }
 }
 
 }  // namespace
@@ -67,18 +85,18 @@ void motorBegin() {
     pinMode(pin, OUTPUT);
   }
   releaseCoils();
+  xTaskCreatePinnedToCore(motorTask, "motor", TASK_STACK_BYTES, nullptr,
+                          TASK_PRIORITY, nullptr, TASK_CORE);
 }
 
-void motorMove(long halfSteps) {
+bool motorRun(bool forward) {
   portENTER_CRITICAL(&stateLock);
-  if (locked || halfSteps == 0) {
-    stopNow();
-  } else {
-    direction = halfSteps > 0 ? 1 : -1;
-    remainingSteps = labs(halfSteps);
-    lastStepUs = micros();
+  const bool allowed = !locked;
+  if (allowed) {
+    direction = forward ? 1 : -1;
   }
   portEXIT_CRITICAL(&stateLock);
+  return allowed;
 }
 
 void motorStop() {
@@ -94,32 +112,6 @@ void motorSetLocked(bool value) {
     stopNow();
   }
   portEXIT_CRITICAL(&stateLock);
-}
-
-void motorUpdate() {
-  const unsigned long now = micros();
-
-  portENTER_CRITICAL(&stateLock);
-  // If loop() was late, the next step simply comes later: catching up with a
-  // burst of steps would be too fast for the motor.
-  if (remainingSteps > 0 && now - lastStepUs >= HALF_STEP_INTERVAL_US) {
-    lastStepUs = now;
-    phase = (phase + direction + PHASE_COUNT) % PHASE_COUNT;
-    applyPhase();
-
-    remainingSteps--;
-    if (remainingSteps == 0) {
-      stopNow();
-    }
-  }
-  portEXIT_CRITICAL(&stateLock);
-}
-
-bool motorIsRunning() {
-  portENTER_CRITICAL(&stateLock);
-  const bool running = remainingSteps > 0;
-  portEXIT_CRITICAL(&stateLock);
-  return running;
 }
 
 bool motorIsLocked() {

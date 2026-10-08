@@ -63,6 +63,9 @@ const int64_t DAYLIGHT_HOLDOFF_US = 500 * 1000LL;
 const int32_t FLAME_RISE_TO_CLEAR_MV = 50;
 const int64_t CLEAR_DELAY_US = 3000 * 1000LL;
 
+// Length of a test asked by a command.
+const int64_t TEST_DURATION_US = 3000 * 1000LL;
+
 // --- Task -------------------------------------------------------------------
 
 // Priority well above loop() (1), so the alarm task interrupts it at once,
@@ -78,9 +81,14 @@ const uint32_t TASK_STACK_BYTES = 4096;
 const UBaseType_t EVENT_QUEUE_LENGTH = 8;
 QueueHandle_t eventQueue = nullptr;
 
+// Requests from loop() (test, silence), read by the task on every sample.
+enum class Request : uint8_t { Test, Silence };
+const UBaseType_t REQUEST_QUEUE_LENGTH = 4;
+QueueHandle_t requestQueue = nullptr;
+
 // Latest values, shared with loop().
 portMUX_TYPE statusLock = portMUX_INITIALIZER_UNLOCKED;
-AlarmStatus sharedStatus = {false, 0, 0};
+AlarmStatus sharedStatus = {AlarmState::Off, 0, 0};
 
 // Average of the last WINDOW samples of one sensor.
 template <int WINDOW>
@@ -105,10 +113,71 @@ struct MovingAverage {
   }
 };
 
-void setOutputs(bool on) {
-  digitalWrite(PIN_ALARM_LED, on ? HIGH : LOW);
-  digitalWrite(PIN_BUZZER, on ? HIGH : LOW);
-  motorSetLocked(on);
+// What the alarm currently asks of the outputs.
+struct Alarm {
+  bool flame = false;      // flame alarm in progress
+  bool test = false;       // test in progress
+  bool muted = false;      // buzzer silenced by a command
+  int64_t testEndsUs = 0;
+
+  bool busy() const { return flame || test; }
+
+  AlarmState state() const {
+    if (flame) {
+      return muted ? AlarmState::Silenced : AlarmState::On;
+    }
+    return test ? AlarmState::Test : AlarmState::Off;
+  }
+};
+
+// Drives the LED, the buzzer and the motor lock from the alarm, touching them
+// only when something changes.
+void updateOutputs(const Alarm &alarm) {
+  static bool applied = false;
+  static bool led = false;
+  static bool buzzer = false;
+
+  const bool wantLed = alarm.busy();
+  const bool wantBuzzer = alarm.busy() && !alarm.muted;
+  if (applied && wantLed == led && wantBuzzer == buzzer) {
+    return;
+  }
+  digitalWrite(PIN_ALARM_LED, wantLed ? HIGH : LOW);
+  digitalWrite(PIN_BUZZER, wantBuzzer ? HIGH : LOW);
+  if (!applied || wantLed != led) {
+    motorSetLocked(wantLed);
+  }
+  applied = true;
+  led = wantLed;
+  buzzer = wantBuzzer;
+}
+
+// Carries out the requests sent by loop(). The safety rules live here, so
+// they hold whatever the caller checked.
+void handleRequests(Alarm &alarm, int64_t nowUs) {
+  Request request;
+  while (xQueueReceive(requestQueue, &request, 0) == pdTRUE) {
+    switch (request) {
+      case Request::Test:
+        if (!alarm.flame) {
+          alarm.test = true;
+          alarm.muted = false;
+          alarm.testEndsUs = nowUs + TEST_DURATION_US;
+        }
+        break;
+      case Request::Silence:
+        if (alarm.busy()) {
+          alarm.muted = true;
+        }
+        break;
+    }
+  }
+  if (alarm.test && nowUs >= alarm.testEndsUs) {
+    alarm.test = false;
+    if (!alarm.flame) {
+      alarm.muted = false;
+    }
+  }
 }
 
 void sendEvent(AlarmEventType type, int32_t flameRise, int32_t lightRise,
@@ -132,7 +201,7 @@ void alarmTask(void *) {
   float flameReference = firstFlame;
   float lightReference = firstLight;
 
-  bool active = false;
+  Alarm alarm;
   int samplesOver = 0;
   int64_t firstOverUs = 0;
   int64_t flameLastSeenUs = 0;
@@ -146,7 +215,8 @@ void alarmTask(void *) {
     const uint32_t flameSample = sensorsReadFlameMilliVolts();
     const uint32_t lightSample = sensorsReadLightMilliVolts();
     const int64_t nowUs = esp_timer_get_time();
-    captureRecord(flameSample, lightSample, active);
+    captureRecord(flameSample, lightSample, alarm.flame);
+    handleRequests(alarm, nowUs);
 
     const uint32_t flame = flameAverage.add(flameSample);
     const uint32_t light = lightAverage.add(lightSample);
@@ -158,7 +228,7 @@ void alarmTask(void *) {
     if (bright && abs(lightRise) >= LIGHT_CHANGE_MV) {
       // The visible light moved: daylight is changing, and the infrared
       // change comes from it, not from a flame.
-      if (!active && samplesOver > 0) {
+      if (!alarm.flame && samplesOver > 0) {
         sendEvent(AlarmEventType::Ignored, flameRise, lightRise, nowUs, nowUs);
       }
       holdoffUntilUs = nowUs + DAYLIGHT_HOLDOFF_US;
@@ -174,7 +244,7 @@ void alarmTask(void *) {
       samplesOver = 0;
     }
 
-    if (!active) {
+    if (!alarm.flame) {
       if (flameRise >= FLAME_RISE_TO_RAISE_MV) {
         if (samplesOver == 0) {
           firstOverUs = nowUs;
@@ -189,9 +259,12 @@ void alarmTask(void *) {
       }
 
       if (samplesOver >= SAMPLES_TO_RAISE) {
-        setOutputs(true);
+        // A real alarm takes over a test, and always sounds.
+        alarm.flame = true;
+        alarm.test = false;
+        alarm.muted = false;
+        updateOutputs(alarm);
         const int64_t reactedAtUs = esp_timer_get_time();
-        active = true;
         flameLastSeenUs = nowUs;
         sendEvent(AlarmEventType::Raised, flameRise, lightRise, firstOverUs,
                   reactedAtUs);
@@ -202,15 +275,17 @@ void alarmTask(void *) {
       if (flameRise >= FLAME_RISE_TO_CLEAR_MV) {
         flameLastSeenUs = nowUs;
       } else if (nowUs - flameLastSeenUs >= CLEAR_DELAY_US) {
-        setOutputs(false);
-        active = false;
+        alarm.flame = false;
+        alarm.muted = false;
         samplesOver = 0;
         sendEvent(AlarmEventType::Cleared, flameRise, lightRise, nowUs, nowUs);
       }
     }
 
+    updateOutputs(alarm);
+
     portENTER_CRITICAL(&statusLock);
-    sharedStatus = {active, flameRise, lightRise};
+    sharedStatus = {alarm.state(), flameRise, lightRise};
     portEXIT_CRITICAL(&statusLock);
   }
 }
@@ -220,9 +295,10 @@ void alarmTask(void *) {
 void alarmBegin() {
   pinMode(PIN_ALARM_LED, OUTPUT);
   pinMode(PIN_BUZZER, OUTPUT);
-  setOutputs(false);
+  updateOutputs(Alarm());
 
   eventQueue = xQueueCreate(EVENT_QUEUE_LENGTH, sizeof(AlarmEvent));
+  requestQueue = xQueueCreate(REQUEST_QUEUE_LENGTH, sizeof(Request));
   xTaskCreatePinnedToCore(alarmTask, "alarm", TASK_STACK_BYTES, nullptr,
                           TASK_PRIORITY, nullptr, TASK_CORE);
 }
@@ -237,4 +313,14 @@ AlarmStatus alarmStatus() {
 bool alarmNextEvent(AlarmEvent &event) {
   return eventQueue != nullptr &&
          xQueueReceive(eventQueue, &event, 0) == pdTRUE;
+}
+
+void alarmRequestTest() {
+  const Request request = Request::Test;
+  xQueueSend(requestQueue, &request, 0);
+}
+
+void alarmRequestSilence() {
+  const Request request = Request::Silence;
+  xQueueSend(requestQueue, &request, 0);
 }

@@ -18,8 +18,15 @@
 
 #include <Arduino.h>
 
+enum class AlarmState : uint8_t {
+  Off,       // no alarm
+  On,        // flame: LED and buzzer on, motor locked
+  Silenced,  // flame, buzzer muted by a command: LED on, motor still locked
+  Test,      // test asked by a command: LED, buzzer and motor lock for 3 s
+};
+
 struct AlarmStatus {
-  bool active;
+  AlarmState state;
   // Gaps between each sensor (flame averaged over 100 ms, light over 10 ms)
   // and its reference level, which follows the sensor slowly (about 10 s).
   int32_t flameRiseMilliVolts;
@@ -46,6 +53,17 @@ void alarmBegin();
 
 // Latest values seen by the alarm task, for display.
 AlarmStatus alarmStatus();
+
+// Requests from the commands received over the network, carried out by the
+// alarm task within 2 ms. The safety rules of docs/protocol.md are enforced
+// here, whatever the caller checked before:
+// - a test lights the LED, sounds the buzzer and locks the motor for 3 s; it
+//   is ignored during a flame alarm;
+// - silencing only mutes the buzzer of the current alarm or test: the LED
+//   stays on and the motor stays locked.
+// Nothing can end a flame alarm: it clears by itself once the flame is gone.
+void alarmRequestTest();
+void alarmRequestSilence();
 
 // Takes the next alarm event, if there is one. Never blocks: meant to be
 // polled from loop().
