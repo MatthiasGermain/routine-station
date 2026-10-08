@@ -88,8 +88,14 @@ les lampes halogènes émettent aussi de l'infrarouge.
 | TX2 (GPIO17) | IN3 |
 | RX2 (GPIO16) | IN4 |
 | rail 5 V | + (5-12V) |
-| rail GND | − |
+| **GND côté gauche de l'ESP32** (sous 3V3), fil direct | − |
 
+- **Masse du moteur à part.** Le − de l'ULN2003 ne passe pas par le rail GND
+  des capteurs : il a son propre fil jusqu'à la broche GND libre de l'ESP32.
+  Branché sur le rail, le courant du moteur (environ 200 mA) traversait les
+  contacts de la breadboard et décalait la masse des capteurs de quelques
+  dizaines de millivolts : la température gagnait 2 à 3 °C dès que le moteur
+  tournait.
 - **D5 reste libre** même si elle est entre D18 et TX2 : elle envoie un signal
   au démarrage qui ferait tressauter le moteur.
 - **Diagnostic avec les LED A à D** de la carte ULN2003 (A = IN1 … D = IN4) :
@@ -104,19 +110,42 @@ les lampes halogènes émettent aussi de l'infrarouge.
   quand il démarre, l'alimenter par le module d'alimentation 3,3 V/5 V du kit,
   masse commune avec l'ESP32.
 
-### Récapitulatif
+## Étape 2 : alarme
 
-| Élément | GPIO | Nom sur la carte |
-|---------|------|------------------|
-| LED intégrée | 2 | — |
-| LM35 | 34 | D34 |
-| Photorésistance | 35 | D35 |
-| Capteur de flamme | 32 | D32 |
-| ULN2003 IN1 | 19 | D19 |
-| ULN2003 IN2 | 18 | D18 |
-| ULN2003 IN3 | 17 | TX2 |
-| ULN2003 IN4 | 16 | RX2 |
+### LED rouge
 
-## Étape 2 et suivantes
+```
+D26 ── résistance 220 Ω ── patte longue LED   patte courte ── rail GND
+```
 
-_À venir : LED et buzzer de l'alarme._
+Environ 6 mA : (3,3 V − 2 V de la LED) / 220 Ω.
+
+### Buzzer actif
+
+| Patte du buzzer | Vers |
+|-----------------|------|
+| + (longue) | **D27** (GPIO27) |
+| − (courte) | rail GND |
+
+Le buzzer du kit est prévu pour 5 V, et le kit n'a pas de transistor pour le
+commander sous 5 V. Testé directement sur le 3,3 V, il sonne assez fort : il est
+donc branché en direct sur la broche, qui fournit son courant. Il sonne un peu
+moins fort que sur le 3V3, la broche ne fournissant pas tout à fait autant.
+
+D26 et D27 ne sont pas des broches de démarrage et n'envoient rien au boot :
+pas de bip ni de flash parasite à l'allumage.
+
+## Récapitulatif
+
+| Élément | GPIO | Nom sur la carte | Étape |
+|---------|------|------------------|-------|
+| LED intégrée | 2 | — | 0 |
+| LM35 | 34 | D34 | 1 |
+| Photorésistance | 35 | D35 | 1 |
+| Capteur de flamme | 32 | D32 | 1 |
+| ULN2003 IN1 | 19 | D19 | 1 |
+| ULN2003 IN2 | 18 | D18 | 1 |
+| ULN2003 IN3 | 17 | TX2 | 1 |
+| ULN2003 IN4 | 16 | RX2 | 1 |
+| LED d'alarme | 26 | D26 | 2 |
+| Buzzer | 27 | D27 | 2 |

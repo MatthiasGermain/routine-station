@@ -81,7 +81,7 @@ README.md / README.fr.md   README bilingue (anglais principal, français en miro
 platformio.ini             configuration de la carte et de la chaîne de compilation
 include/pins.h             toutes les broches au même endroit
 src/                       un module par responsabilité, à plat :
-                           sensors, motor, alarm, network (+ main.cpp)
+                           sensors, motor, alarm, capture, network (+ main.cpp)
 docs/protocol.md           contrat ESP32 <-> web (topics MQTT, JSON), référence
                            commune avec le repo du site
 docs/wiring.md             câblage broche par broche, points d'attention
@@ -134,4 +134,12 @@ $pio = "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe"
 & $pio run                 # compiler
 & $pio run -t upload       # téléverser (carte branchée en USB)
 & $pio device monitor      # moniteur série, 115200 bauds
+& $pio device monitor -f log2file   # idem, enregistré dans logs/ (ignoré par git)
 ```
+
+Touches dans le moniteur série (firmware depuis l'étape 2) :
+
+- `c` : enregistre 5 s de mesures brutes (flamme, lumière, état de l'alarme,
+  toutes les 2 ms) puis les affiche en CSV. Lancer le moniteur avec
+  `-f log2file` pour que Claude puisse lire le fichier dans `logs/`.
+- `s` : active ou coupe l'expérience « `loop()` bloquée 500 ms à chaque tour ».
