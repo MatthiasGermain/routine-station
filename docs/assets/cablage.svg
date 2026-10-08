@@ -1,0 +1,227 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 800" width="1100" height="800" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="1100" height="800" rx="14" fill="white"/>
+<text x="40" y="46" font-size="24" text-anchor="start" fill="#111827" font-weight="bold">Câblage de la station</text>
+<text x="40" y="70" font-size="13" text-anchor="start" fill="#6b7280" font-weight="normal">ESP32 DevKit V1 vu de dessus, port USB en haut · état à l'étape 3 · détail broche par broche : docs/wiring.md</text>
+<rect x="430" y="165" width="160" height="537" rx="10" fill="#1f2937"/>
+<rect x="490" y="148" width="40" height="22" rx="3" fill="#9ca3af"/>
+<text x="510" y="140" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">USB</text>
+<text x="510" y="440" font-size="15" text-anchor="middle" fill="#e5e7eb" font-weight="bold" transform="rotate(-90 510 440)">ESP32 DevKit V1</text>
+<polyline points="482,680 490,688 498,680 506,688 514,680 522,688 530,680 538,688" fill="none" stroke="#9ca3af" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="510" y="722" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">antenne (à dégager)</text>
+<rect x="429" y="195" width="10" height="10" rx="2" fill="#ea580c"/>
+<text x="446" y="204" font-size="11" text-anchor="start" fill="#f9fafb" font-weight="normal">3V3</text>
+<rect x="429" y="229" width="10" height="10" rx="2" fill="#111827"/>
+<text x="446" y="238" font-size="11" text-anchor="start" fill="#f9fafb" font-weight="normal">GND</text>
+<rect x="429" y="263" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="272" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">D15</text>
+<rect x="429" y="297" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="306" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">D2</text>
+<rect x="429" y="331" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="340" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">D4</text>
+<rect x="429" y="365" width="10" height="10" rx="2" fill="#059669"/>
+<text x="446" y="374" font-size="11" text-anchor="start" fill="#f9fafb" font-weight="normal">RX2</text>
+<rect x="429" y="399" width="10" height="10" rx="2" fill="#059669"/>
+<text x="446" y="408" font-size="11" text-anchor="start" fill="#f9fafb" font-weight="normal">TX2</text>
+<rect x="429" y="433" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="442" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">D5</text>
+<rect x="429" y="467" width="10" height="10" rx="2" fill="#059669"/>
+<text x="446" y="476" font-size="11" text-anchor="start" fill="#f9fafb" font-weight="normal">D18</text>
+<rect x="429" y="501" width="10" height="10" rx="2" fill="#059669"/>
+<text x="446" y="510" font-size="11" text-anchor="start" fill="#f9fafb" font-weight="normal">D19</text>
+<rect x="429" y="535" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="544" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">D21</text>
+<rect x="429" y="569" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="578" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">RX0</text>
+<rect x="429" y="603" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="612" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">TX0</text>
+<rect x="429" y="637" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="646" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">D22</text>
+<rect x="429" y="671" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="446" y="680" font-size="11" text-anchor="start" fill="#9ca3af" font-weight="normal">D23</text>
+<rect x="581" y="195" width="10" height="10" rx="2" fill="#dc2626"/>
+<text x="574" y="204" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">VIN</text>
+<rect x="581" y="229" width="10" height="10" rx="2" fill="#111827"/>
+<text x="574" y="238" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">GND</text>
+<rect x="581" y="263" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="574" y="272" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">D13</text>
+<rect x="581" y="297" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="574" y="306" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">D12</text>
+<rect x="581" y="331" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="574" y="340" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">D14</text>
+<rect x="581" y="365" width="10" height="10" rx="2" fill="#7c3aed"/>
+<text x="574" y="374" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">D27</text>
+<rect x="581" y="399" width="10" height="10" rx="2" fill="#7c3aed"/>
+<text x="574" y="408" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">D26</text>
+<rect x="581" y="433" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="574" y="442" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">D25</text>
+<rect x="581" y="467" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="574" y="476" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">D33</text>
+<rect x="581" y="501" width="10" height="10" rx="2" fill="#2563eb"/>
+<text x="574" y="510" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">D32</text>
+<rect x="581" y="535" width="10" height="10" rx="2" fill="#2563eb"/>
+<text x="574" y="544" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">D35</text>
+<rect x="581" y="569" width="10" height="10" rx="2" fill="#2563eb"/>
+<text x="574" y="578" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">D34</text>
+<rect x="581" y="603" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="574" y="612" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">VN</text>
+<rect x="581" y="637" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="574" y="646" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">VP</text>
+<rect x="581" y="671" width="10" height="10" rx="2" fill="#6b7280"/>
+<text x="574" y="680" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">EN</text>
+<polyline points="590,200 622,200" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="622,200 622,186" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="613,186 631,186" fill="none" stroke="#dc2626" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="622" y="180" font-size="11" text-anchor="middle" fill="#dc2626" font-weight="bold">5 V</text>
+<text x="640" y="204" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">VIN alimente le rail rouge (5 V de l'USB)</text>
+<polyline points="590,234 622,234" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="622,234 622,243" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="613,243 631,243" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="616,247 628,247" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="619.5,251 624.5,251" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="640" y="238" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">GND : rail bleu, masse des capteurs</text>
+<polyline points="430,200 384,200" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="384,200 384,186" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="375,186 393,186" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="384" y="180" font-size="11" text-anchor="middle" fill="#ea580c" font-weight="bold">3,3 V</text>
+<text x="366" y="204" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">fils directs, pas de rail</text>
+<polyline points="590,370 650,370 650,300 722,300" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="740" cy="300" r="18" fill="white" stroke="#111827" stroke-width="1.8"/>
+<text x="740" y="304" font-size="11" text-anchor="middle" fill="#111827" font-weight="bold">BZ</text>
+<text x="726" y="292" font-size="12" text-anchor="end" fill="#111827" font-weight="bold">+</text>
+<polyline points="758,300 800,300" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="800,300 800,309" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="791,309 809,309" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="794,313 806,313" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="797.5,317 802.5,317" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="740" y="272" font-size="12" text-anchor="middle" fill="#111827" font-weight="bold">Buzzer actif</text>
+<polyline points="590,404 630,404 630,390 690,390" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="690" y="383" width="50" height="14" rx="2" fill="white" stroke="#111827" stroke-width="1.8"/>
+<text x="715.0" y="378" font-size="11" text-anchor="middle" fill="#111827" font-weight="normal">220 Ω</text>
+<polyline points="740,390 775,390" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="775,380 775,400 795,390" fill="white" stroke="#111827" stroke-width="1.8"/>
+<polyline points="795,380 795,400" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="793,378 807,364" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="801,364 807,364 807,370" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="804,378 818,364" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="812,364 818,364 818,370" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="795,390 840,390" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="840,390 840,399" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="831,399 849,399" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="834,403 846,403" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="837.5,407 842.5,407" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="785" y="418" font-size="12" text-anchor="middle" fill="#111827" font-weight="bold">LED rouge</text>
+<text x="760" y="432" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">patte longue côté résistance</text>
+<polyline points="590,506 630,506 630,500 700,500" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="700" cy="500" r="4" fill="#2563eb"/>
+<polyline points="700,500 760,500" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="760,490 760,510 782,500" fill="white" stroke="#111827" stroke-width="1.8"/>
+<polyline points="782,490 782,510" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="748,468 762,482" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="756,482 762,482 762,476" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="759,468 773,482" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="767,482 773,482 773,476" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="782,500 850,500" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,500 850,486" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="841,486 859,486" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="850" y="480" font-size="11" text-anchor="middle" fill="#ea580c" font-weight="bold">3,3 V</text>
+<text x="752" y="493" font-size="9" text-anchor="end" fill="#6b7280" font-weight="normal">longue</text>
+<text x="789" y="493" font-size="9" text-anchor="start" fill="#6b7280" font-weight="normal">courte</text>
+<text x="778" y="460" font-size="12" text-anchor="middle" fill="#111827" font-weight="bold">Capteur de flamme (récepteur IR)</text>
+<polyline points="700,500 700,512" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="693" y="512" width="14" height="36" rx="2" fill="white" stroke="#111827" stroke-width="1.8"/>
+<text x="713" y="534.0" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">10 kΩ</text>
+<polyline points="700,548 700,554" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="700,554 700,563" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="691,563 709,563" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="694,567 706,567" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="697.5,571 702.5,571" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="590,540 650,540 650,608 700,608" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="700" cy="608" r="4" fill="#2563eb"/>
+<polyline points="700,608 760,608" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="760" y="600" width="46" height="16" rx="8" fill="white" stroke="#111827" stroke-width="1.8"/>
+<polyline points="756,578 770,592" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="764,592 770,592 770,586" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="767,578 781,592" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="775,592 781,592 781,586" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="806,608 850,608" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="850,608 850,594" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="841,594 859,594" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="850" y="588" font-size="11" text-anchor="middle" fill="#ea580c" font-weight="bold">3,3 V</text>
+<text x="800" y="572" font-size="12" text-anchor="middle" fill="#111827" font-weight="bold">Photorésistance</text>
+<polyline points="700,608 700,618" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="693" y="618" width="14" height="32" rx="2" fill="white" stroke="#111827" stroke-width="1.8"/>
+<text x="713" y="638.0" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">10 kΩ</text>
+<polyline points="700,650 700,654" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="700,654 700,663" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="691,663 709,663" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="694,667 706,667" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="697.5,671 702.5,671" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="590,574 630,574 630,722 800,722" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="800" y="700" width="64" height="44" rx="5" fill="white" stroke="#111827" stroke-width="1.8"/>
+<text x="832" y="727" font-size="13" text-anchor="middle" fill="#111827" font-weight="bold">LM35</text>
+<text x="806" y="716" font-size="9" text-anchor="start" fill="#6b7280" font-weight="normal">Vout</text>
+<polyline points="832,700 832,688" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="832,688 832,674" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="823,674 841,674" fill="none" stroke="#dc2626" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="832" y="668" font-size="11" text-anchor="middle" fill="#dc2626" font-weight="bold">5 V</text>
+<text x="840" y="696" font-size="9" text-anchor="start" fill="#6b7280" font-weight="normal">+Vs</text>
+<polyline points="832,744 832,752" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="832,752 832,761" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="823,761 841,761" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="826,765 838,765" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="829.5,769 834.5,769" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="842" y="756" font-size="9" text-anchor="start" fill="#6b7280" font-weight="normal">GND</text>
+<text x="880" y="726" font-size="12" text-anchor="start" fill="#111827" font-weight="bold">Température</text>
+<text x="880" y="741" font-size="10" text-anchor="start" fill="#6b7280" font-weight="normal">face plate vers soi : +Vs, Vout, GND</text>
+<rect x="170" y="330" width="160" height="230" rx="8" fill="white" stroke="#111827" stroke-width="1.8"/>
+<text x="232" y="445" font-size="15" text-anchor="middle" fill="#111827" font-weight="bold">ULN2003</text>
+<text x="232" y="463" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">driver moteur</text>
+<polyline points="430,370 330,370" fill="none" stroke="#059669" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="322" y="374" font-size="11" text-anchor="end" fill="#111827" font-weight="bold">IN4</text>
+<text x="380" y="364" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">GPIO16</text>
+<polyline points="430,404 330,404" fill="none" stroke="#059669" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="322" y="408" font-size="11" text-anchor="end" fill="#111827" font-weight="bold">IN3</text>
+<text x="380" y="398" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">GPIO17</text>
+<polyline points="430,472 330,472" fill="none" stroke="#059669" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="322" y="476" font-size="11" text-anchor="end" fill="#111827" font-weight="bold">IN2</text>
+<text x="380" y="466" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">GPIO18</text>
+<polyline points="430,506 330,506" fill="none" stroke="#059669" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="322" y="510" font-size="11" text-anchor="end" fill="#111827" font-weight="bold">IN1</text>
+<text x="380" y="500" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">GPIO19</text>
+<text x="420" y="442" font-size="10" text-anchor="end" fill="#6b7280" font-weight="normal">D5 : laisser libre</text>
+<polyline points="250,330 250,300" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,300 250,286" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="241,286 259,286" fill="none" stroke="#dc2626" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="250" y="280" font-size="11" text-anchor="middle" fill="#dc2626" font-weight="bold">5 V</text>
+<text x="258" y="346" font-size="13" text-anchor="start" fill="#111827" font-weight="bold">+</text>
+<polyline points="430,234 300,234 300,330" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="296" y="346" font-size="14" text-anchor="end" fill="#111827" font-weight="bold">−</text>
+<text x="365" y="227" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">masse du moteur, fil direct</text>
+<circle cx="92" cy="445" r="38" fill="white" stroke="#111827" stroke-width="1.8"/>
+<text x="92" y="452" font-size="20" text-anchor="middle" fill="#111827" font-weight="bold">M</text>
+<text x="92" y="505" font-size="12" text-anchor="middle" fill="#111827" font-weight="bold">Moteur 28BYJ-48</text>
+<polyline points="130,437 170,437" fill="none" stroke="#2563eb" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="130,441 170,441" fill="none" stroke="#ec4899" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="130,445 170,445" fill="none" stroke="#eab308" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="130,449 170,449" fill="none" stroke="#f97316" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="130,453 170,453" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="150" y="430" font-size="9" text-anchor="middle" fill="#6b7280" font-weight="normal">5 fils</text>
+<text x="40" y="590" font-size="13" text-anchor="start" fill="#111827" font-weight="bold">Repères</text>
+<polyline points="40,608 62,608" fill="none" stroke="#dc2626" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="70" y="612" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">5 V : rail rouge, alimenté par VIN</text>
+<polyline points="40,626 62,626" fill="none" stroke="#ea580c" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="70" y="630" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">3,3 V : broche 3V3</text>
+<polyline points="40,644 62,644" fill="none" stroke="#111827" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="70" y="648" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">masse : rail bleu, relié au GND de droite</text>
+<polyline points="40,662 62,662" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="70" y="666" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">capteurs (entrées analogiques, ADC1)</text>
+<polyline points="40,680 62,680" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="70" y="684" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">alarme : LED et buzzer</text>
+<polyline points="40,698 62,698" fill="none" stroke="#059669" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="70" y="702" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">moteur</text>
+<circle cx="51" cy="716" r="4" fill="#111827"/>
+<text x="70" y="720" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">point : fils reliés</text>
+<text x="40" y="742" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">Les symboles de même nom sont tous reliés entre eux.</text>
+<text x="40" y="760" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">Le − de l'ULN2003 a son propre fil vers le GND de gauche :</text>
+<text x="40" y="778" font-size="11" text-anchor="start" fill="#6b7280" font-weight="normal">le courant du moteur ne fausse pas les capteurs.</text>
+</svg>

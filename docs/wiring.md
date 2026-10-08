@@ -4,6 +4,13 @@ Branchement broche par broche de la station, avec les points d'attention
 (tensions, résistances). Les numéros de GPIO de ce document et ceux de
 [`include/pins.h`](../include/pins.h) doivent toujours être identiques.
 
+![Schéma de câblage de la station](assets/cablage.svg)
+
+Sur le schéma, les alimentations sont dessinées avec des symboles plutôt
+qu'avec des fils : tous les « 5 V » sont reliés (rail rouge), tous les « 3,3 V »
+aussi (broche 3V3), et toutes les masses (rail bleu). Seule exception, le fil de
+masse du moteur, dessiné en entier parce qu'il est volontairement séparé.
+
 ## Carte
 
 ESP32 DevKit V1, 30 broches (module ESP32-WROOM-32). Les noms ci-dessous sont
