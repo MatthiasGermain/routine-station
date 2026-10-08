@@ -7,7 +7,7 @@ and streams its measurements to a cloud MQTT broker, while a web page shows them
 live and sends commands back. When a flame is detected, the alarm and the motor
 stop are handled on the board in real time, with or without a network.
 
-**Status:** step 2 of 6 done (real-time flame alarm, measured). See the
+**Status:** step 3 of 6 done (connected over MQTT and TLS). See the
 [roadmap](#roadmap).
 
 ## Demo
@@ -27,7 +27,7 @@ flowchart LR
         sensors --> esp --> actuators
     end
 
-    broker[("HiveMQ Cloud<br/>MQTT broker")]
+    broker[("EMQX Serverless<br/>MQTT broker")]
 
     subgraph site["Website on Vercel"]
         page["/routine page"]
@@ -83,6 +83,9 @@ French):
 - [0002: a home-made stepper motor driver](docs/decisions/0002-pilote-moteur-maison.md)
 - [0003: the flame alarm in a FreeRTOS task](docs/decisions/0003-alarme-tache-freertos.md)
 - [0004: telling a flame from daylight](docs/decisions/0004-flamme-ou-lumiere-du-jour.md)
+- [0005: EMQX Serverless as the MQTT broker](docs/decisions/0005-broker-emqx.md)
+- [0006: PubSubClient as the MQTT client](docs/decisions/0006-pubsubclient.md)
+- [0007: the motor in its own FreeRTOS task](docs/decisions/0007-moteur-tache-freertos.md)
 
 ## Real-time guarantees
 
@@ -111,8 +114,9 @@ Known limits: about 20 cm of range in daylight, see the
 
 _Implemented at steps 3 and 5._ The design:
 
-- The broker has two sets of credentials: a read-only one used by the public
-  page, and a command one used only by a server-side API route.
+- The broker has three users, each restricted to its own topics: the station,
+  a read-only one used by the public page, and a command one used only by a
+  server-side API route.
 - The API route checks that the owner is logged in (Auth.js, GitHub login
   restricted to one account) and validates every command: allowed type, values
   within bounds.
@@ -128,7 +132,7 @@ _Implemented at steps 3 and 5._ The design:
   serial monitor (`v0.1-sensors`)
 - [x] **Step 2, real-time flame alarm**: dedicated high-priority task, measured
   reaction time (`v0.2-alarm`)
-- [ ] **Step 3, cloud broker**: Wi-Fi, MQTT over TLS, automatic reconnection,
+- [x] **Step 3, cloud broker**: Wi-Fi, MQTT over TLS, automatic reconnection,
   measurements out, commands in (`v0.3-mqtt`)
 - [ ] **Step 4, live `/routine` page**: in the website repository
   (`v0.4-live-page`)

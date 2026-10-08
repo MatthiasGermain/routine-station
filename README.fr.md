@@ -8,7 +8,7 @@ qu'une page web les affiche en direct et renvoie des ordres. Quand une flamme
 est détectée, l'alarme et l'arrêt du moteur sont gérés sur la carte en temps
 réel, avec ou sans réseau.
 
-**État :** étape 2 sur 6 terminée (alarme flamme temps réel, mesurée). Voir la
+**État :** étape 3 sur 6 terminée (connectée en MQTT et TLS). Voir la
 [feuille de route](#feuille-de-route).
 
 ## Démo
@@ -28,7 +28,7 @@ flowchart LR
         sensors --> esp --> actuators
     end
 
-    broker[("HiveMQ Cloud<br/>broker MQTT")]
+    broker[("EMQX Serverless<br/>broker MQTT")]
 
     subgraph site["Site web sur Vercel"]
         page["Page /routine"]
@@ -84,6 +84,9 @@ Une note courte par décision importante, dans
 - [0002 : un pilote maison pour le moteur pas-à-pas](docs/decisions/0002-pilote-moteur-maison.md)
 - [0003 : l'alarme flamme dans une tâche FreeRTOS](docs/decisions/0003-alarme-tache-freertos.md)
 - [0004 : distinguer une flamme de la lumière du jour](docs/decisions/0004-flamme-ou-lumiere-du-jour.md)
+- [0005 : EMQX Serverless comme broker MQTT](docs/decisions/0005-broker-emqx.md)
+- [0006 : PubSubClient comme client MQTT](docs/decisions/0006-pubsubclient.md)
+- [0007 : le moteur dans sa propre tâche FreeRTOS](docs/decisions/0007-moteur-tache-freertos.md)
 
 ## Garanties temps réel
 
@@ -112,9 +115,9 @@ l'algorithme. Limites connues : environ 20 cm de portée en plein jour, voir le
 
 _Mis en place aux étapes 3 et 5._ La conception :
 
-- Le broker a deux jeux d'identifiants : un en lecture seule, utilisé par la
-  page publique, et un de commande, utilisé uniquement par une route API côté
-  serveur.
+- Le broker a trois utilisateurs, chacun limité à ses propres topics : la
+  station, un en lecture seule utilisé par la page publique, et un de commande
+  utilisé uniquement par une route API côté serveur.
 - La route API vérifie que le propriétaire est connecté (Auth.js, connexion
   GitHub limitée à un seul compte) et valide chaque commande : type autorisé,
   valeurs dans les bornes.
@@ -130,7 +133,7 @@ _Mis en place aux étapes 3 et 5._ La conception :
   le moniteur série (`v0.1-sensors`)
 - [x] **Étape 2, alarme flamme temps réel** : tâche dédiée à haute priorité,
   temps de réaction mesuré (`v0.2-alarm`)
-- [ ] **Étape 3, broker cloud** : Wi-Fi, MQTT en TLS, reconnexion automatique,
+- [x] **Étape 3, broker cloud** : Wi-Fi, MQTT en TLS, reconnexion automatique,
   envoi des mesures, réception des commandes (`v0.3-mqtt`)
 - [ ] **Étape 4, page `/routine` en direct** : dans le dépôt du site
   (`v0.4-live-page`)
