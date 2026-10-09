@@ -49,6 +49,10 @@ Broker : **EMQX Serverless**, offre gratuite, région Europe (Francfort)
   les réponses. Créé à l'étape 5 et vérifié dans MQTT Explorer : ses commandes
   atteignent la station, et un `{"online": false}` publié avec lui sur
   `status` n'a eu aucun effet sur la page.
+- Le droit de `station` sur `samples` date de l'étape 6. **Sans lui, le broker
+  jette les échantillons sans rien dire** : en QoS 0, la station ne reçoit
+  aucune réponse et les croit partis. Toute nouvelle publication demande donc
+  d'abord sa règle d'autorisation.
 - Les droits sont des règles d'autorisation EMQX, en liste blanche : une règle
   « tous les utilisateurs : `#`, publication et abonnement : refusé », puis une
   règle « autorisé » par utilisateur et par topic du tableau.
@@ -191,8 +195,8 @@ Le chemin d'un échantillon (étape 6) :
    fois ;
 4. la route publique `GET /api/station/history?range=24h|7d|30d|1y` renvoie
    les points des graphes : les échantillons de 5 min sur 24 h, des moyennes par
-   heure sur 7 et 30 jours, par jour sur un an. Elle est mise en cache 5 min par
-   Vercel.
+   heure sur 7 et 30 jours, par jour (de l'heure de Paris) sur un an. Elle est
+   mise en cache 5 min par Vercel.
 
 La table a la sécurité au niveau des lignes (RLS) activée, sans aucune règle
 d'accès : seul le serveur du site, avec la connexion Postgres, y lit et écrit.
