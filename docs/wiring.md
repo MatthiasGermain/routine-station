@@ -39,7 +39,7 @@ pour garder des trous libres des deux côtés.
 |--------|------|------|
 | VIN | rail rouge | **5 V** (celui de l'USB, environ 4,7 V après la diode de la carte) |
 | GND | rail bleu | masse commune |
-| 3V3 | fils directs | photorésistance et capteur de flamme |
+| 3V3 | fils directs | photorésistance et module tactile |
 
 - Le 3,3 V n'a pas de rail, exprès : avec un seul rail rouge, impossible de
   brancher par erreur un capteur 3,3 V sur le 5 V.
@@ -70,21 +70,6 @@ Monté à l'envers, il chauffe vite.
 Pont diviseur : plus il y a de lumière, plus la tension sur GPIO35 monte. La
 résistance de 10 kΩ est de l'ordre de celle de la photorésistance dans une pièce
 éclairée, c'est là que le montage est le plus sensible.
-
-### Flamme : récepteur infrarouge
-
-Le capteur du kit est un récepteur infrarouge nu, en forme de LED noire à
-2 pattes, sans module ni sortie numérique.
-
-```
-3V3 ── patte courte  capteur  patte longue ──┬── 10 kΩ ── GND
-                                             │
-                                        GPIO32 (D32)
-```
-
-Plus il reçoit d'infrarouge, plus la tension sur GPIO32 monte. Monté dans
-l'autre sens, la valeur reste bloquée, sans risque pour la carte. Le soleil et
-les lampes halogènes émettent aussi de l'infrarouge.
 
 ### Moteur : 28BYJ-48 et driver ULN2003
 
@@ -142,6 +127,25 @@ moins fort que sur le 3V3, la broche ne fournissant pas tout à fait autant.
 D26 et D27 ne sont pas des broches de démarrage et n'envoient rien au boot :
 pas de bip ni de flash parasite à l'allumage.
 
+### Arrêt d'urgence : module tactile TTP223
+
+Il remplace le capteur de flamme de l'étape 1, abandonné : en plein jour, il ne
+distinguait pas une flamme de la lumière du soleil
+([décision 0008](decisions/0008-arret-urgence-tactile.md)).
+
+| Broche du module | Vers | Remarque |
+|------------------|------|----------|
+| VCC | **3V3** | **pas le 5 V** : la sortie SIG sortirait du 5 V |
+| GND | rail GND | |
+| SIG | **D32** (GPIO32) | à l'état haut tant qu'on touche la pastille |
+
+- Le module fonctionne de 2 à 5,5 V ; alimenté en 3,3 V, sa sortie est
+  compatible avec l'ESP32. Sa petite LED s'allume quand on le touche.
+- Il se calibre à la mise sous tension : **ne pas toucher la pastille** pendant
+  la première seconde.
+- Le front montant de SIG déclenche une interruption matérielle. Une résistance
+  de tirage interne vers la masse garde l'entrée à 0 si le module est débranché.
+
 ## Récapitulatif
 
 | Élément | GPIO | Nom sur la carte | Étape |
@@ -149,10 +153,10 @@ pas de bip ni de flash parasite à l'allumage.
 | LED intégrée | 2 | — | 0 |
 | LM35 | 34 | D34 | 1 |
 | Photorésistance | 35 | D35 | 1 |
-| Capteur de flamme | 32 | D32 | 1 |
 | ULN2003 IN1 | 19 | D19 | 1 |
 | ULN2003 IN2 | 18 | D18 | 1 |
 | ULN2003 IN3 | 17 | TX2 | 1 |
 | ULN2003 IN4 | 16 | RX2 | 1 |
 | LED d'alarme | 26 | D26 | 2 |
 | Buzzer | 27 | D27 | 2 |
+| Module tactile (arrêt d'urgence) | 32 | D32 | après l'étape 3 |

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 800" width="1100" height="800" font-family="Segoe UI, Helvetica, Arial, sans-serif">
 <rect width="1100" height="800" rx="14" fill="white"/>
 <text x="40" y="46" font-size="24" text-anchor="start" fill="#111827" font-weight="bold">Câblage de la station</text>
-<text x="40" y="70" font-size="13" text-anchor="start" fill="#6b7280" font-weight="normal">ESP32 DevKit V1 vu de dessus, port USB en haut · état à l'étape 3 · détail broche par broche : docs/wiring.md</text>
+<text x="40" y="70" font-size="13" text-anchor="start" fill="#6b7280" font-weight="normal">ESP32 DevKit V1 vu de dessus, port USB en haut · arrêt d'urgence tactile · détail broche par broche : docs/wiring.md</text>
 <rect x="430" y="165" width="160" height="537" rx="10" fill="#1f2937"/>
 <rect x="490" y="148" width="40" height="22" rx="3" fill="#9ca3af"/>
 <text x="510" y="140" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">USB</text>
@@ -56,7 +56,7 @@
 <text x="574" y="442" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">D25</text>
 <rect x="581" y="467" width="10" height="10" rx="2" fill="#6b7280"/>
 <text x="574" y="476" font-size="11" text-anchor="end" fill="#9ca3af" font-weight="normal">D33</text>
-<rect x="581" y="501" width="10" height="10" rx="2" fill="#2563eb"/>
+<rect x="581" y="501" width="10" height="10" rx="2" fill="#7c3aed"/>
 <text x="574" y="510" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">D32</text>
 <rect x="581" y="535" width="10" height="10" rx="2" fill="#2563eb"/>
 <text x="574" y="544" font-size="11" text-anchor="end" fill="#f9fafb" font-weight="normal">D35</text>
@@ -111,30 +111,23 @@
 <polyline points="837.5,407 842.5,407" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <text x="785" y="418" font-size="12" text-anchor="middle" fill="#111827" font-weight="bold">LED rouge</text>
 <text x="760" y="432" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">patte longue côté résistance</text>
-<polyline points="590,506 630,506 630,500 700,500" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="700" cy="500" r="4" fill="#2563eb"/>
-<polyline points="700,500 760,500" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polygon points="760,490 760,510 782,500" fill="white" stroke="#111827" stroke-width="1.8"/>
-<polyline points="782,490 782,510" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="748,468 762,482" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="756,482 762,482 762,476" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="759,468 773,482" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="767,482 773,482 773,476" fill="none" stroke="#111827" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="782,500 850,500" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="850,500 850,486" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="841,486 859,486" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<text x="850" y="480" font-size="11" text-anchor="middle" fill="#ea580c" font-weight="bold">3,3 V</text>
-<text x="752" y="493" font-size="9" text-anchor="end" fill="#6b7280" font-weight="normal">longue</text>
-<text x="789" y="493" font-size="9" text-anchor="start" fill="#6b7280" font-weight="normal">courte</text>
-<text x="778" y="460" font-size="12" text-anchor="middle" fill="#111827" font-weight="bold">Capteur de flamme (récepteur IR)</text>
-<polyline points="700,500 700,512" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="693" y="512" width="14" height="36" rx="2" fill="white" stroke="#111827" stroke-width="1.8"/>
-<text x="713" y="534.0" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">10 kΩ</text>
-<polyline points="700,548 700,554" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="700,554 700,563" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="691,563 709,563" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="694,567 706,567" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="697.5,571 702.5,571" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="590,506 630,506 630,500 760,500" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="760" y="474" width="100" height="52" rx="6" fill="white" stroke="#111827" stroke-width="1.8"/>
+<text x="810" y="502" font-size="13" text-anchor="middle" fill="#111827" font-weight="bold">TTP223</text>
+<text x="810" y="517" font-size="10" text-anchor="middle" fill="#6b7280" font-weight="normal">module tactile</text>
+<text x="766" y="495" font-size="9" text-anchor="start" fill="#6b7280" font-weight="normal">SIG</text>
+<polyline points="820,474 820,464" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="820,464 820,450" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="811,450 829,450" fill="none" stroke="#ea580c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="820" y="444" font-size="11" text-anchor="middle" fill="#ea580c" font-weight="bold">3,3 V</text>
+<text x="826" y="484" font-size="9" text-anchor="start" fill="#6b7280" font-weight="normal">VCC</text>
+<polyline points="860,510 885,510" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="885,510 885,519" fill="none" stroke="#111827" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="876,519 894,519" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="879,523 891,523" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="882.5,527 887.5,527" fill="none" stroke="#111827" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="864" y="504" font-size="9" text-anchor="start" fill="#6b7280" font-weight="normal">GND</text>
+<text x="810" y="546" font-size="12" text-anchor="middle" fill="#111827" font-weight="bold">Arrêt d'urgence (touch)</text>
 <polyline points="590,540 650,540 650,608 700,608" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
 <circle cx="700" cy="608" r="4" fill="#2563eb"/>
 <polyline points="700,608 760,608" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -216,7 +209,7 @@
 <polyline points="40,662 62,662" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 <text x="70" y="666" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">capteurs (entrées analogiques, ADC1)</text>
 <polyline points="40,680 62,680" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-<text x="70" y="684" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">alarme : LED et buzzer</text>
+<text x="70" y="684" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">alarme : module tactile, LED, buzzer</text>
 <polyline points="40,698 62,698" fill="none" stroke="#059669" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 <text x="70" y="702" font-size="11" text-anchor="start" fill="#111827" font-weight="normal">moteur</text>
 <circle cx="51" cy="716" r="4" fill="#111827"/>

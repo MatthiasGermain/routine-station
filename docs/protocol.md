@@ -73,7 +73,6 @@ Topic `routine/station/measurements`, toutes les 5 s, retenu.
   "uptime_s": 1234,
   "temperature_c": 23.6,
   "light_pct": 88,
-  "flame_rise_mv": 5,
   "alarm": "off",
   "motor": "stopped",
   "rssi_dbm": -61
@@ -86,17 +85,17 @@ Topic `routine/station/measurements`, toutes les 5 s, retenu.
 | `uptime_s` | entier | secondes depuis le démarrage de la station |
 | `temperature_c` | nombre, 1 décimale | température du LM35 |
 | `light_pct` | entier 0 à 100 | lumière visible, relative (pas des lux) |
-| `flame_rise_mv` | entier | hausse d'infrarouge au-dessus du niveau de référence (voir [décision 0004](decisions/0004-flamme-ou-lumiere-du-jour.md)) |
 | `alarm` | `"off"`, `"on"`, `"silenced"`, `"test"` | état de l'alarme (voir plus bas) |
-| `motor` | `"stopped"`, `"forward"`, `"backward"`, `"locked"` | état du moteur ; `locked` pendant une alarme |
+| `motor` | `"stopped"`, `"forward"`, `"backward"`, `"locked"` | état du moteur ; `locked` pendant une alarme ou un test |
 | `rssi_dbm` | entier | force du signal Wi-Fi, utile pour diagnostiquer |
 
 États de l'alarme :
 
 - `off` : pas d'alarme ;
-- `on` : flamme détectée, LED et buzzer allumés, moteur bloqué ;
-- `silenced` : flamme toujours là, buzzer coupé par une commande, LED allumée et
-  moteur toujours bloqué ;
+- `on` : arrêt d'urgence déclenché par le module tactile, LED et buzzer
+  allumés, moteur bloqué ; il reste actif jusqu'au réarmement sur place ;
+- `silenced` : arrêt d'urgence toujours actif, buzzer coupé par une commande,
+  LED allumée et moteur toujours bloqué ;
 - `test` : test lancé par une commande, LED et buzzer pendant 3 s, moteur
   bloqué.
 
@@ -105,14 +104,14 @@ Topic `routine/station/measurements`, toutes les 5 s, retenu.
 Topic `routine/station/events`, envoyés aussitôt.
 
 ```json
-{ "time": "2026-10-08T19:31:12Z", "type": "alarm_raised", "flame_rise_mv": 423, "reaction_ms": 18.0 }
-{ "time": "2026-10-08T19:31:20Z", "type": "alarm_cleared" }
+{ "time": "2026-10-09T10:31:12Z", "type": "alarm_raised", "cause": "touch", "reaction_us": 42 }
+{ "time": "2026-10-09T10:32:05Z", "type": "alarm_cleared" }
 ```
 
 | `type` | Champs en plus |
 |--------|----------------|
-| `alarm_raised` | `flame_rise_mv`, `reaction_ms` (temps de réaction de la tâche d'alarme) |
-| `alarm_cleared` | aucun |
+| `alarm_raised` | `cause` : `"touch"` (le module tactile) ; `reaction_us` : temps de réaction du firmware, de l'interruption aux sorties activées, en microsecondes |
+| `alarm_cleared` | aucun : l'arrêt d'urgence a été réarmé par un appui long sur place |
 
 L'alarme réagit sur la carte sans attendre le réseau : l'événement part dès que
 la connexion le permet, il peut donc arriver après coup.
@@ -150,12 +149,14 @@ n'est pas prévu est refusé.
 
 **Règles de sécurité**, appliquées par l'ESP32 :
 
-- `motor start` est refusé pendant une alarme ou un test ;
+- `motor start` est refusé pendant un arrêt d'urgence ou un test ;
 - `alarm silence` ne coupe que le buzzer : la LED reste allumée et le moteur
-  reste bloqué tant que la flamme est là ;
-- `alarm test` est refusé pendant une vraie alarme ;
-- aucune commande ne peut éteindre une alarme due à une flamme : elle s'arrête
-  seule, 3 s après la disparition de la flamme.
+  reste bloqué ;
+- `alarm test` est refusé pendant un arrêt d'urgence ;
+- **aucune commande ne peut réarmer un arrêt d'urgence** : seul un appui long
+  (2 s) sur le module tactile, sur place, le fait. On ne relance pas à distance
+  une machine que personne ne voit
+  ([décision 0008](decisions/0008-arret-urgence-tactile.md)).
 
 ## Réponses (station → web)
 
@@ -172,7 +173,7 @@ Topic `routine/station/replies`, une réponse par commande reçue.
 | `invalid_json` | JSON illisible |
 | `invalid_id` | `id` absent ou invalide (la réponse a alors `"id": null`) |
 | `invalid_command` | `type`, `action`, `direction` inconnus, ou champ en trop |
-| `alarm_active` | refusé pendant une alarme ou un test |
+| `alarm_active` | refusé pendant un arrêt d'urgence ou un test |
 | `nothing_to_silence` | `silence` alors qu'aucune alarme ne sonne |
 
 ## État de la station

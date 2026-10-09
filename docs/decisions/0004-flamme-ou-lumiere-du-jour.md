@@ -2,6 +2,9 @@
 
 - **Date** : 2026-10-08
 - **Étape** : 2
+- **Statut** : remplacée par la
+  [décision 0008](0008-arret-urgence-tactile.md), le capteur de flamme a été
+  abandonné
 
 ## Contexte
 

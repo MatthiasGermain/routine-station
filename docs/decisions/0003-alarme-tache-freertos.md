@@ -2,6 +2,9 @@
 
 - **Date** : 2026-10-08
 - **Étape** : 2
+- **Statut** : toujours en vigueur. Depuis la
+  [décision 0008](0008-arret-urgence-tactile.md), la tâche est réveillée par
+  le module tactile au lieu de lire le capteur de flamme
 
 ## Contexte
 

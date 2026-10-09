@@ -21,16 +21,17 @@ Vercel). La page `/routine` y existe déjà : c'est le tableau de bord personnel
 de Matthias (planning de la journée, tâches Notion en cours). La station y
 ajoute une section, elle ne remplace rien.
 
-- **Mesures** : température (LM35), lumière (photorésistance + 10 kΩ), flamme
-  (récepteur infrarouge nu à 2 pattes + 10 kΩ : pas de module, **pas de sortie
-  numérique**, donc pas d'interruption matérielle possible, le seuil se fait en
-  logiciel)
+- **Mesures** : température (LM35), lumière (photorésistance + 10 kΩ)
+- **Arrêt d'urgence** : module tactile TTP223 (sortie numérique, interruption
+  matérielle). Il remplace le capteur de flamme, abandonné après l'étape 3 : en
+  plein jour, il ne distinguait pas une flamme du soleil (décision 0008)
 - **Actions** : moteur pas-à-pas 28BYJ-48 via driver ULN2003, LED, buzzer
 - **Ordres depuis le web** : faire tourner / arrêter le moteur, déclencher /
   couper l'alarme, régler des seuils
-- **Temps réel** : si une flamme est détectée, alarme + arrêt moteur immédiats,
-  même si le Wi-Fi ou le broker sont indisponibles. **La sécurité locale ne
-  dépend jamais du réseau.**
+- **Temps réel** : si l'arrêt d'urgence est touché, alarme + arrêt moteur
+  immédiats, même si le Wi-Fi ou le broker sont indisponibles. Il reste
+  verrouillé jusqu'à un appui long de 2 s sur le module, **jamais réarmé depuis
+  le web**. **La sécurité locale ne dépend jamais du réseau.**
 - **Sécurité** :
   - le broker a trois utilisateurs, avec des droits par topic (détail dans
     `docs/protocol.md`) : `station` (l'ESP32), `web-viewer` en lecture seule
@@ -65,7 +66,7 @@ ajoute une section, elle ne remplace rien.
 |---|-------|-----|
 | 0 | Mise en place : structure du repo, PlatformIO, README squelette, conventions | `v0.0-setup` |
 | 1 | Capteurs et moteur en local, résultats dans le moniteur série | `v0.1-sensors` |
-| 2 | Alarme flamme temps réel : tâche FreeRTOS haute priorité qui surveille le capteur, temps de réaction mesuré et documenté | `v0.2-alarm` |
+| 2 | Alarme temps réel : tâche FreeRTOS haute priorité qui surveille le capteur, temps de réaction mesuré et documenté (capteur de flamme, remplacé ensuite par l'arrêt d'urgence tactile) | `v0.2-alarm` |
 | 3 | Connexion au broker cloud : Wi-Fi, MQTT en TLS, reconnexion automatique, publication des mesures, réception des commandes | `v0.3-mqtt` |
 | 4 | Section « Station » de la page `/routine` : affichage en direct (dans le repo `portfolio`) | `v0.4-live-page` |
 | 5 | Commandes depuis le web : route API protégée par login (dans le repo `portfolio`) | `v0.5-commands` |
@@ -85,7 +86,8 @@ README.md / README.fr.md   README bilingue (anglais principal, français en miro
 platformio.ini             configuration de la carte et de la chaîne de compilation
 include/pins.h             toutes les broches au même endroit
 src/                       un module par responsabilité, à plat :
-                           sensors, motor, alarm, capture, network (+ main.cpp)
+                           sensors, motor, alarm, network, messages, commands
+                           (+ main.cpp)
 docs/protocol.md           contrat ESP32 <-> web (topics MQTT, JSON), référence
                            commune avec le repo du site
 docs/wiring.md             câblage broche par broche, points d'attention
@@ -141,11 +143,11 @@ $pio = "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe"
 & $pio device monitor -f log2file   # idem, enregistré dans logs/ (ignoré par git)
 ```
 
+Pour que Claude puisse lire un log, lancer le moniteur avec `-f log2file` : le
+fichier arrive dans `logs/`.
+
 Touches dans le moniteur série (firmware depuis l'étape 2) :
 
-- `c` : enregistre 5 s de mesures brutes (flamme, lumière, état de l'alarme,
-  toutes les 2 ms) puis les affiche en CSV. Lancer le moniteur avec
-  `-f log2file` pour que Claude puisse lire le fichier dans `logs/`.
 - `s` : active ou coupe l'expérience « `loop()` bloquée 500 ms à chaque tour ».
 - `n` (depuis l'étape 3) : coupe le Wi-Fi de l'ESP32 pendant 60 s, comme une
   panne réseau, puis le laisse se reconnecter seul.

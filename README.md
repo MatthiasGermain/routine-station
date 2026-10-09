@@ -4,8 +4,9 @@
 
 A connected monitoring station: an ESP32 reads sensors, drives a stepper motor
 and streams its measurements to a cloud MQTT broker, while a web page shows them
-live and sends commands back. When a flame is detected, the alarm and the motor
-stop are handled on the board in real time, with or without a network.
+live and sends commands back. When someone touches the emergency stop, the
+alarm and the motor stop are handled on the board in real time, with or without
+a network.
 
 **Status:** step 3 of 6 done (connected over MQTT and TLS). See the
 [roadmap](#roadmap).
@@ -21,7 +22,7 @@ Target architecture, built step by step:
 ```mermaid
 flowchart LR
     subgraph station["Station"]
-        sensors["Sensors<br/>temperature, light, flame"]
+        sensors["Sensors<br/>temperature, light, touch emergency stop"]
         esp["ESP32 firmware<br/>Arduino + FreeRTOS"]
         actuators["Actuators<br/>stepper motor, LED, buzzer"]
         sensors --> esp --> actuators
@@ -41,8 +42,8 @@ flowchart LR
     api -- "validated command, command access" --> broker
 ```
 
-The flame alarm lives entirely inside the station box: it never waits for the
-broker or the Wi-Fi.
+The emergency stop lives entirely inside the station box: it never waits for
+the broker or the Wi-Fi.
 
 ## Hardware
 
@@ -53,7 +54,7 @@ Everything comes from an Arduino UNO starter kit plus an ESP32 board.
 | ESP32 DevKit V1 (ESP32-WROOM-32, 30 pins) | Microcontroller, Wi-Fi |
 | LM35 | Temperature |
 | Photoresistor + 10 kΩ resistor | Ambient light |
-| Infrared flame sensor + 10 kΩ resistor | Flame detection |
+| TTP223 capacitive touch module | Emergency stop |
 | 28BYJ-48 stepper motor + ULN2003 driver | Motor |
 | LED, buzzer | Alarm |
 
@@ -82,32 +83,42 @@ French):
 - [0001: PlatformIO and the Arduino framework](docs/decisions/0001-platformio-arduino.md)
 - [0002: a home-made stepper motor driver](docs/decisions/0002-pilote-moteur-maison.md)
 - [0003: the flame alarm in a FreeRTOS task](docs/decisions/0003-alarme-tache-freertos.md)
-- [0004: telling a flame from daylight](docs/decisions/0004-flamme-ou-lumiere-du-jour.md)
+- [0004: telling a flame from daylight](docs/decisions/0004-flamme-ou-lumiere-du-jour.md),
+  replaced by 0008
 - [0005: EMQX Serverless as the MQTT broker](docs/decisions/0005-broker-emqx.md)
 - [0006: PubSubClient as the MQTT client](docs/decisions/0006-pubsubclient.md)
 - [0007: the motor in its own FreeRTOS task](docs/decisions/0007-moteur-tache-freertos.md)
+- [0008: a touch emergency stop instead of the flame sensor](docs/decisions/0008-arret-urgence-tactile.md)
 
 ## Real-time guarantees
 
-The flame alarm runs in its own FreeRTOS task, with a higher priority than
-`loop()`. It samples the sensors every 2 ms and, on a flame, turns on the LED
-and the buzzer and locks the motor without going through `loop()`. A watchdog
-reboots the board if the task ever stops. Measured on the board:
+The alarm runs in its own FreeRTOS task, with a higher priority than the motor
+task and `loop()`. The touch module has a digital output: a touch fires a
+hardware interrupt that wakes the task, which turns on the LED and the buzzer
+and locks the motor without going through `loop()`. The emergency stop then
+stays latched until a 2-second touch on the module itself: no command from the
+web can reset it. A watchdog reboots the board if the task ever stops.
+
+Measured on the board, over 11 touches:
 
 | Measure | Result |
 |---------|--------|
-| Sampling period | 2.000 ms on average, always within 1.69–2.26 ms, even while `loop()` is stalled |
-| Flame onset to alarm | 88 ms; 72 ms with `loop()` stalled 500 ms per pass |
-| Same check done in a stalled `loop()` | noticed only after 127 ms in the test, up to 500 ms |
-| False alarms | none on shadows and hands |
+| Interrupt to LED, buzzer and motor lock | 54 µs median, 15 to 86 µs |
+| Same, with `loop()` stalled 500 ms per pass | 54 µs; `loop()` itself only saw the alarm 388 ms later |
+| Same, during a network outage | 53 µs; six more touches handled during 4.5 minutes without Wi-Fi |
+| Commands during an emergency stop | `motor start` and `alarm test` refused, `silence` only mutes the buzzer |
 
-![Raw sensor captures: shadow, hand, lighter, lighter with loop() stalled](docs/assets/02-alarme-flamme.png)
+The touch module itself takes 60 to 220 ms to recognize a finger, depending on
+its mode (TTP223 datasheet, not measured here): it is the slowest link, not the
+firmware.
 
-The bare infrared sensor also sees daylight, so the photoresistor serves as a
-reference to tell a flame from a change of daylight
-([decision 0004](docs/decisions/0004-flamme-ou-lumiere-du-jour.md)). Thresholds
-were chosen by recording raw signals and replaying them through the algorithm.
-Known limits: about 20 cm of range in daylight, see the
+Until step 3, the alarm was triggered by a bare infrared flame sensor. With
+daylight in the room, it could not tell a nearby flame from the sun coming
+back: four detection rules in two days, each tuned by recording raw signals
+and replaying them on a PC, each fixing one case and breaking another. It was
+replaced by the touch emergency stop
+([decision 0008](docs/decisions/0008-arret-urgence-tactile.md)). The flame
+measurements and the capture-and-replay method are in the
 [step 2 journal](docs/journal/02-alarme-flamme.md) (in French).
 
 ## Security model
@@ -130,8 +141,9 @@ _Implemented at steps 3 and 5._ The design:
   conventions (`v0.0-setup`)
 - [x] **Step 1, local sensors and motor**: everything works, results on the
   serial monitor (`v0.1-sensors`)
-- [x] **Step 2, real-time flame alarm**: dedicated high-priority task, measured
-  reaction time (`v0.2-alarm`)
+- [x] **Step 2, real-time alarm**: dedicated high-priority task, measured
+  reaction time (`v0.2-alarm`); first triggered by a flame sensor, replaced
+  after step 3 by a touch emergency stop
 - [x] **Step 3, cloud broker**: Wi-Fi, MQTT over TLS, automatic reconnection,
   measurements out, commands in (`v0.3-mqtt`)
 - [ ] **Step 4, live `/routine` page**: in the website repository

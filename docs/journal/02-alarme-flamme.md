@@ -131,3 +131,23 @@ Vérification sur la carte :
 
 _À ajouter dans `docs/assets/` : une photo du montage avec la LED et le buzzer,
 un GIF de l'alarme qui se déclenche._
+
+## Épilogue : le capteur de flamme abandonné (2026-10-09)
+
+Après l'étape 3, la station a tourné toute une journée près de la fenêtre, et
+la règle finale n'a pas tenu : fausse alarme à chaque retour de la lumière
+après une ombre de quelques secondes. Deux nouvelles règles ont suivi, rejouées
+sur PC comme ici. Chacune réglait les ombres, mais laissait passer un briquet à
+5 cm : de près, la flamme éclaire assez la photorésistance pour ressembler à un
+retour du soleil.
+
+Quatre règles en deux jours, sans en trouver une qui tienne : ce capteur nu ne
+distingue pas une flamme proche du soleil. Il a été remplacé par un **arrêt
+d'urgence tactile** (module TTP223, interruption matérielle, verrouillé jusqu'à
+un appui long de 2 s), voir la
+[décision 0008](../decisions/0008-arret-urgence-tactile.md). La tâche d'alarme,
+les sorties et le blocage du moteur construits ici sont restés tels quels :
+seul le déclencheur a changé.
+
+Ce journal reste le récit de l'étape telle qu'elle a été menée. Le code du
+capteur de flamme et du mode capture est au tag `v0.3-mqtt`.
