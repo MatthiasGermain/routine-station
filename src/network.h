@@ -41,8 +41,10 @@ int networkRssi();
 time_t networkTime();
 
 // Publications, each to its own topic. They return false, and send nothing,
-// while the broker is unreachable, except events, which are kept (up to 8)
-// and sent as soon as the connection comes back.
+// while the broker is unreachable, except events and samples, which are kept
+// and sent as soon as the connection comes back: up to 8 events (the newest
+// are dropped when full) and 24 samples, 2 hours (the oldest are dropped).
 bool networkPublishMeasurements(const char *json);
 void networkPublishEvent(const char *json);
+void networkPublishSample(const char *json);
 bool networkPublishReply(const char *json);

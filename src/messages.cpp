@@ -95,3 +95,11 @@ size_t messageTemperatureEvent(char *out, size_t size,
   doc["threshold_c"] = event.thresholdC;
   return finish(doc, out, size);
 }
+
+size_t messageSample(char *out, size_t size, const Sample &sample) {
+  JsonDocument doc;
+  setTime(doc, sample.time);
+  doc["temperature_c"] = roundf(sample.temperatureC * 10) / 10;
+  doc["light_pct"] = sample.lightPercent;
+  return finish(doc, out, size);
+}

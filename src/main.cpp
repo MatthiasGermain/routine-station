@@ -7,7 +7,8 @@
 // out the commands it receives (src/commands.cpp), as described in
 // docs/protocol.md. The motor only turns on command. A temperature alert,
 // with a threshold set from the web, lights the onboard LED
-// (src/temperature_alert.cpp).
+// (src/temperature_alert.cpp). Every 5 minutes, the average readings go out
+// for the long-term history (src/samples.cpp).
 //
 // Three FreeRTOS tasks share core 1, by priority: the alarm (10), the motor
 // (5), then loop() (1). loop() handles everything that may wait: the network,
@@ -26,6 +27,7 @@
 #include "messages.h"
 #include "motor.h"
 #include "network.h"
+#include "samples.h"
 #include "sensors.h"
 #include "temperature_alert.h"
 
@@ -34,8 +36,8 @@ const unsigned long SERIAL_BAUD = 115200;
 
 // Readings on the serial monitor, and measurements sent to the broker.
 const unsigned long REPORT_INTERVAL_MS = 1000;
-// Temperature alert check, about once per second (see temperature_alert.h).
-const unsigned long TEMPERATURE_CHECK_INTERVAL_MS = 1000;
+// One reading per second feeds the temperature alert and the history samples.
+const unsigned long READING_INTERVAL_MS = 1000;
 const unsigned long PUBLISH_INTERVAL_MS = 5000;
 
 // Experiment of the step 2 journal: once turned on with 's', every pass of
@@ -102,18 +104,10 @@ void handleAlarmEvents() {
   }
 }
 
-// Feeds the temperature alert every TEMPERATURE_CHECK_INTERVAL_MS, and prints
-// and publishes its start and end.
-void checkTemperatureIfDue() {
-  static unsigned long lastCheckMs = 0;
-
-  if (millis() - lastCheckMs < TEMPERATURE_CHECK_INTERVAL_MS) {
-    return;
-  }
-  lastCheckMs = millis();
-
+// Feeds the temperature alert, and prints and publishes its start and end.
+void handleTemperatureAlert(float temperatureC) {
   TemperatureEvent event;
-  if (!temperatureAlertUpdate(sensorsRead().temperatureC, event)) {
+  if (!temperatureAlertUpdate(temperatureC, event)) {
     return;
   }
   Serial.printf(">>> temperature %s: %.1f C, threshold %d C\n",
@@ -126,6 +120,39 @@ void checkTemperatureIfDue() {
   if (messageTemperatureEvent(json, sizeof(json), event, networkTime()) > 0) {
     networkPublishEvent(json);
   }
+}
+
+// Feeds the 5-minute averages, and prints and publishes each finished one.
+void handleSamples(const SensorReadings &readings) {
+  Sample sample;
+  if (!samplesAdd(readings, networkTime(), sample)) {
+    return;
+  }
+  struct tm utc;
+  gmtime_r(&sample.time, &utc);
+  Serial.printf(">>> history sample %02d:%02d UTC: %.1f C, %u %%\n",
+                utc.tm_hour, utc.tm_min, sample.temperatureC,
+                sample.lightPercent);
+
+  char json[96];
+  if (messageSample(json, sizeof(json), sample) > 0) {
+    networkPublishSample(json);
+  }
+}
+
+// Reads the sensors every READING_INTERVAL_MS for the temperature alert and
+// the history.
+void readSensorsIfDue() {
+  static unsigned long lastReadingMs = 0;
+
+  if (millis() - lastReadingMs < READING_INTERVAL_MS) {
+    return;
+  }
+  lastReadingMs = millis();
+
+  const SensorReadings readings = sensorsRead();
+  handleTemperatureAlert(readings.temperatureC);
+  handleSamples(readings);
 }
 
 // Keys typed in the serial monitor.
@@ -200,7 +227,7 @@ void setup() {
 void loop() {
   handleSerialInput();
   handleAlarmEvents();
-  checkTemperatureIfDue();
+  readSensorsIfDue();
   networkUpdate();
   publishIfDue();
   reportIfDue();

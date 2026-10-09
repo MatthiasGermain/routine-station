@@ -7,6 +7,7 @@
 
 #include "alarm.h"
 #include "motor.h"
+#include "samples.h"
 #include "sensors.h"
 #include "temperature_alert.h"
 
@@ -32,3 +33,6 @@ size_t messageEvent(char *out, size_t size, const AlarmEvent &event,
 // routine/station/events (temperature alert started or ended)
 size_t messageTemperatureEvent(char *out, size_t size,
                                const TemperatureEvent &event, time_t eventTime);
+
+// routine/station/samples (5-minute average, for the long-term history)
+size_t messageSample(char *out, size_t size, const Sample &sample);

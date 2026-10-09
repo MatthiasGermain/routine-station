@@ -24,6 +24,7 @@ const char TOPIC_EVENTS[] = "routine/station/events";
 const char TOPIC_STATUS[] = "routine/station/status";
 const char TOPIC_COMMANDS[] = "routine/station/commands";
 const char TOPIC_REPLIES[] = "routine/station/replies";
+const char TOPIC_SAMPLES[] = "routine/station/samples";
 
 const char STATUS_ONLINE[] = "{\"online\":true}";
 // Last Will: published by the broker itself if the station disappears.
@@ -96,7 +97,13 @@ unsigned long outageEndsMs = 0;
 const int PENDING_EVENTS = 8;
 const size_t EVENT_BYTES = 192;
 char pendingEvents[PENDING_EVENTS][EVENT_BYTES];
-int pendingCount = 0;
+int pendingEventCount = 0;
+
+// History samples waiting for the broker: 24 of them, 2 hours of history.
+const int PENDING_SAMPLES = 24;
+const size_t SAMPLE_BYTES = 96;
+char pendingSamples[PENDING_SAMPLES][SAMPLE_BYTES];
+int pendingSampleCount = 0;
 
 void onMessage(char *topic, uint8_t *payload, unsigned int length) {
   if (strcmp(topic, TOPIC_COMMANDS) == 0 && commandHandler != nullptr) {
@@ -104,17 +111,20 @@ void onMessage(char *topic, uint8_t *payload, unsigned int length) {
   }
 }
 
-void flushPendingEvents() {
+// Publishes the messages of a waiting queue, oldest first, until the broker
+// stops accepting them. Works for both queues (events and samples), whatever
+// the size of their messages.
+template <size_t MESSAGE_BYTES>
+void flushPending(const char *topic, char (*queue)[MESSAGE_BYTES], int &count) {
   int sent = 0;
-  while (sent < pendingCount &&
-         mqtt.publish(TOPIC_EVENTS, pendingEvents[sent])) {
+  while (sent < count && mqtt.publish(topic, queue[sent])) {
     sent++;
   }
   // Keep the ones that did not go out, in order.
-  for (int i = sent; i < pendingCount; i++) {
-    strcpy(pendingEvents[i - sent], pendingEvents[i]);
+  for (int i = sent; i < count; i++) {
+    strcpy(queue[i - sent], queue[i]);
   }
-  pendingCount -= sent;
+  count -= sent;
 }
 
 void connectBroker() {
@@ -227,7 +237,8 @@ void networkUpdate() {
   if (mqtt.connected()) {
     state = NetworkState::Online;
     mqtt.loop();  // handles incoming commands and keep-alive
-    flushPendingEvents();
+    flushPending(TOPIC_EVENTS, pendingEvents, pendingEventCount);
+    flushPending(TOPIC_SAMPLES, pendingSamples, pendingSampleCount);
     return;
   }
 
@@ -285,16 +296,37 @@ bool networkPublishMeasurements(const char *json) {
 }
 
 void networkPublishEvent(const char *json) {
-  if (mqtt.connected() && pendingCount == 0 &&
+  if (mqtt.connected() && pendingEventCount == 0 &&
       mqtt.publish(TOPIC_EVENTS, json)) {
     return;
   }
-  if (pendingCount == PENDING_EVENTS || strlen(json) >= EVENT_BYTES) {
+  if (pendingEventCount == PENDING_EVENTS || strlen(json) >= EVENT_BYTES) {
     Serial.println(">>> MQTT: event dropped (queue full or too long)");
     return;
   }
-  strcpy(pendingEvents[pendingCount], json);
-  pendingCount++;
+  strcpy(pendingEvents[pendingEventCount], json);
+  pendingEventCount++;
+}
+
+void networkPublishSample(const char *json) {
+  if (strlen(json) >= SAMPLE_BYTES) {
+    Serial.println(">>> MQTT: sample dropped (too long)");
+    return;
+  }
+  if (mqtt.connected() && pendingSampleCount == 0 &&
+      mqtt.publish(TOPIC_SAMPLES, json)) {
+    return;
+  }
+  // Queue full: forget the oldest sample, the recent history matters more.
+  if (pendingSampleCount == PENDING_SAMPLES) {
+    for (int i = 1; i < PENDING_SAMPLES; i++) {
+      strcpy(pendingSamples[i - 1], pendingSamples[i]);
+    }
+    pendingSampleCount--;
+    Serial.println(">>> MQTT: oldest waiting sample dropped (queue full)");
+  }
+  strcpy(pendingSamples[pendingSampleCount], json);
+  pendingSampleCount++;
 }
 
 bool networkPublishReply(const char *json) {
