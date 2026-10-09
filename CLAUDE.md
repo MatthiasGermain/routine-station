@@ -101,6 +101,8 @@ src/                       un module par responsabilité, à plat :
 docs/protocol.md           contrat ESP32 <-> web (topics MQTT, JSON), référence
                            commune avec le repo du site
 docs/wiring.md             câblage broche par broche, points d'attention
+docs/services-en-ligne.md  EMQX, Vercel, Supabase : réglages, variables, base,
+                           consulter l'historique, dépannage
 docs/journal/              un fichier court par étape
 docs/decisions/            une note courte par choix important
 docs/assets/               photos, captures, GIF
