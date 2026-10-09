@@ -145,7 +145,10 @@ De bout en bout, depuis la page :
 - [x] coupure réseau simulée (touche `n`) : « pas de réponse », et la commande
   ne s'exécute pas au retour du réseau
 - [x] délai entre le clic et la réponse « fait » : 1,6 s pour un « Stop »
-  mesuré depuis le PC ; en ligne, très variable, d'une demi-seconde à 8 s
+  mesuré depuis le PC ; en ligne, très variable, d'une demi-seconde à 8 s,
+  tant que la fonction Vercel tournait aux États-Unis. Passée à Francfort
+  (`fra1`), à côté du broker : nettement plus rapide à l'usage (pas encore
+  chiffré)
 
 ## Limites connues
 
@@ -153,8 +156,11 @@ De bout en bout, depuis la page :
   clic et « fait », près de la limite de 9 s de la route. Trois causes
   s'additionnent : la fonction Vercel tourne par défaut aux États-Unis alors
   que le broker est à Francfort, chaque commande ouvre une nouvelle connexion
-  TLS, et EMQX Serverless confirme parfois la connexion lentement. Piste : la
-  région `fra1` pour les fonctions, non appliquée.
+  TLS, et EMQX Serverless confirme parfois la connexion lentement. Les
+  fonctions du site tournent désormais à Francfort (`fra1`, réglage du projet
+  Vercel, une seule région possible avec l'offre gratuite) : c'est nettement
+  mieux. Restent la connexion TLS à chaque commande et les lenteurs
+  occasionnelles d'EMQX.
 - **Ni double authentification ni limite de tentatives** sur le mot de passe
   ([décision 0009](../decisions/0009-session-mot-de-passe-commandes.md)) : la
   sécurité physique reste sur la carte.
