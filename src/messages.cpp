@@ -56,6 +56,7 @@ const char *motorStateName(MotorState state) {
 size_t messageMeasurements(char *out, size_t size,
                            const SensorReadings &readings,
                            const AlarmStatus &alarm, MotorState motor,
+                           const TemperatureAlertStatus &temperatureAlert,
                            uint32_t uptimeSeconds, time_t now, int rssi) {
   JsonDocument doc;
   setTime(doc, now);
@@ -65,6 +66,8 @@ size_t messageMeasurements(char *out, size_t size,
   doc["alarm"] = alarmStateName(alarm.state);
   doc["motor"] = motorStateName(motor);
   doc["rssi_dbm"] = rssi;
+  doc["temperature_threshold_c"] = temperatureAlert.thresholdC;
+  doc["temperature_high"] = temperatureAlert.high;
   return finish(doc, out, size);
 }
 
@@ -79,5 +82,16 @@ size_t messageEvent(char *out, size_t size, const AlarmEvent &event,
   } else {
     doc["type"] = "alarm_cleared";
   }
+  return finish(doc, out, size);
+}
+
+size_t messageTemperatureEvent(char *out, size_t size,
+                               const TemperatureEvent &event, time_t eventTime) {
+  JsonDocument doc;
+  setTime(doc, eventTime);
+  doc["type"] = event.type == TemperatureEventType::High ? "temperature_high"
+                                                         : "temperature_normal";
+  doc["temperature_c"] = roundf(event.temperatureC * 10) / 10;
+  doc["threshold_c"] = event.thresholdC;
   return finish(doc, out, size);
 }

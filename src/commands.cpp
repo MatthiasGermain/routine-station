@@ -4,6 +4,7 @@
 
 #include "alarm.h"
 #include "motor.h"
+#include "temperature_alert.h"
 
 namespace {
 
@@ -29,8 +30,9 @@ void writeReply(char *reply, size_t size, const char *id, const char *error) {
 // error code of the reply.
 //
 // Every accepted command has exactly the fields listed in docs/protocol.md:
-// "id", "type", "action", plus "direction" for motor start. Checking the
-// number of fields refuses any extra one.
+// "id", "type", "action", plus "direction" for motor start or
+// "temperature_c" for threshold set. Checking the number of fields refuses
+// any extra one.
 const char *execute(JsonObjectConst command) {
   const char *type = command["type"].as<const char *>();
   const char *action = command["action"].as<const char *>();
@@ -85,6 +87,23 @@ const char *execute(JsonObjectConst command) {
       return nullptr;
     }
     return "invalid_command";
+  }
+
+  if (strcmp(type, "threshold") == 0) {
+    if (strcmp(action, "set") != 0 || command.size() != 4) {
+      return "invalid_command";
+    }
+    // A whole number only: 28.5, "28" or true are refused.
+    const JsonVariantConst temperature = command["temperature_c"];
+    if (!temperature.is<int>()) {
+      return "invalid_command";
+    }
+    // Accepted at any time, even during an emergency stop: a threshold is
+    // harmless.
+    if (!temperatureAlertSetThreshold(temperature.as<int>())) {
+      return "out_of_range";
+    }
+    return nullptr;
   }
 
   return "invalid_command";

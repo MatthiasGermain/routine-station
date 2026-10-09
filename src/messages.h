@@ -8,6 +8,7 @@
 #include "alarm.h"
 #include "motor.h"
 #include "sensors.h"
+#include "temperature_alert.h"
 
 // Names used both in the messages and on the serial monitor.
 const char *alarmStateName(AlarmState state);
@@ -21,8 +22,13 @@ const char *motorStateName(MotorState state);
 size_t messageMeasurements(char *out, size_t size,
                            const SensorReadings &readings,
                            const AlarmStatus &alarm, MotorState motor,
+                           const TemperatureAlertStatus &temperatureAlert,
                            uint32_t uptimeSeconds, time_t now, int rssi);
 
 // routine/station/events (emergency stop raised or reset)
 size_t messageEvent(char *out, size_t size, const AlarmEvent &event,
                     time_t eventTime);
+
+// routine/station/events (temperature alert started or ended)
+size_t messageTemperatureEvent(char *out, size_t size,
+                               const TemperatureEvent &event, time_t eventTime);

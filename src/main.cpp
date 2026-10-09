@@ -5,7 +5,9 @@
 // connects to the MQTT broker over TLS (src/network.cpp), publishes its
 // measurements every 5 s and the alarm events (src/messages.cpp), and carries
 // out the commands it receives (src/commands.cpp), as described in
-// docs/protocol.md. The motor only turns on command.
+// docs/protocol.md. The motor only turns on command. A temperature alert,
+// with a threshold set from the web, lights the onboard LED
+// (src/temperature_alert.cpp).
 //
 // Three FreeRTOS tasks share core 1, by priority: the alarm (10), the motor
 // (5), then loop() (1). loop() handles everything that may wait: the network,
@@ -25,12 +27,15 @@
 #include "motor.h"
 #include "network.h"
 #include "sensors.h"
+#include "temperature_alert.h"
 
 // Must match monitor_speed in platformio.ini
 const unsigned long SERIAL_BAUD = 115200;
 
 // Readings on the serial monitor, and measurements sent to the broker.
 const unsigned long REPORT_INTERVAL_MS = 1000;
+// Temperature alert check, about once per second (see temperature_alert.h).
+const unsigned long TEMPERATURE_CHECK_INTERVAL_MS = 1000;
 const unsigned long PUBLISH_INTERVAL_MS = 5000;
 
 // Experiment of the step 2 journal: once turned on with 's', every pass of
@@ -97,6 +102,32 @@ void handleAlarmEvents() {
   }
 }
 
+// Feeds the temperature alert every TEMPERATURE_CHECK_INTERVAL_MS, and prints
+// and publishes its start and end.
+void checkTemperatureIfDue() {
+  static unsigned long lastCheckMs = 0;
+
+  if (millis() - lastCheckMs < TEMPERATURE_CHECK_INTERVAL_MS) {
+    return;
+  }
+  lastCheckMs = millis();
+
+  TemperatureEvent event;
+  if (!temperatureAlertUpdate(sensorsRead().temperatureC, event)) {
+    return;
+  }
+  Serial.printf(">>> temperature %s: %.1f C, threshold %d C\n",
+                event.type == TemperatureEventType::High
+                    ? "ALERT (onboard LED on)"
+                    : "back to normal",
+                event.temperatureC, event.thresholdC);
+
+  char json[192];
+  if (messageTemperatureEvent(json, sizeof(json), event, networkTime()) > 0) {
+    networkPublishEvent(json);
+  }
+}
+
 // Keys typed in the serial monitor.
 void handleSerialInput() {
   while (Serial.available() > 0) {
@@ -125,8 +156,8 @@ void publishIfDue() {
 
   char json[256];
   if (messageMeasurements(json, sizeof(json), sensorsRead(), alarmStatus(),
-                          motorState(), uptimeSeconds(), networkTime(),
-                          networkRssi()) > 0) {
+                          motorState(), temperatureAlertStatus(),
+                          uptimeSeconds(), networkTime(), networkRssi()) > 0) {
     networkPublishMeasurements(json);
   }
 }
@@ -142,9 +173,12 @@ void reportIfDue() {
 
   const SensorReadings readings = sensorsRead();
   const AlarmStatus alarm = alarmStatus();
+  const TemperatureAlertStatus temperatureAlert = temperatureAlertStatus();
   Serial.printf(
-      "temp=%.1f C  light=%u %%  touch=%s  alarm=%s  motor=%s  net=%s\n",
-      readings.temperatureC, readings.lightPercent,
+      "temp=%.1f C (threshold %d%s)  light=%u %%  touch=%s  alarm=%s  "
+      "motor=%s  net=%s\n",
+      readings.temperatureC, temperatureAlert.thresholdC,
+      temperatureAlert.high ? ", HIGH" : "", readings.lightPercent,
       alarm.touched ? "yes" : "no", alarmStateName(alarm.state),
       motorStateName(motorState()), networkStateName(networkState()));
 }
@@ -152,17 +186,21 @@ void reportIfDue() {
 void setup() {
   Serial.begin(SERIAL_BAUD);
   sensorsBegin();
+  temperatureAlertBegin();
   motorBegin();
   alarmBegin();
   networkBegin(onCommand);
 
   Serial.println();
   Serial.println("routine-station: connected station, touch emergency stop");
+  Serial.printf(">>> temperature alert threshold: %d C (from flash)\n",
+                temperatureAlertStatus().thresholdC);
 }
 
 void loop() {
   handleSerialInput();
   handleAlarmEvents();
+  checkTemperatureIfDue();
   networkUpdate();
   publishIfDue();
   reportIfDue();
