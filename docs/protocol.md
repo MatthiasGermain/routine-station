@@ -43,7 +43,12 @@ Broker : **EMQX Serverless**, offre gratuite, région Europe (Francfort)
   n'atteint pas la station.
 - `web-viewer` s'abonne **topic par topic** : un filtre plus large (`#`,
   `routine/station/#`) dépasse ses droits et le broker le refuse.
-- Le mot de passe de `web-command` ne quitte jamais le serveur Vercel.
+- `web-command` n'est utilisé que par la route `POST /api/station/command` du
+  site, côté serveur : son mot de passe ne quitte jamais Vercel. Il ne peut ni
+  s'abonner ni lire `replies` : c'est la page, avec `web-viewer`, qui reçoit
+  les réponses. Créé à l'étape 5 et vérifié dans MQTT Explorer : ses commandes
+  atteignent la station, et un `{"online": false}` publié avec lui sur
+  `status` n'a eu aucun effet sur la page.
 - Les droits sont des règles d'autorisation EMQX, en liste blanche : une règle
   « tous les utilisateurs : `#`, publication et abonnement : refusé », puis une
   règle « autorisé » par utilisateur et par topic du tableau.
@@ -168,6 +173,23 @@ Une commande envoyée pendant que la station est hors ligne est **perdue** : la
 station se connecte sans session persistante, et le broker ne lui garde rien.
 C'est voulu : un ordre ne doit pas s'exécuter des minutes plus tard, quand plus
 personne ne le surveille.
+
+**Le chemin d'une commande** (étape 5) :
+
+1. un bouton de la vue propriétaire de `/routine` appelle la route du site
+   `POST /api/station/command` ;
+2. la route vérifie la session par mot de passe
+   ([décision 0009](decisions/0009-session-mot-de-passe-commandes.md)),
+   l'en-tête `Origin`, le format (JSON de 1 Ko au plus) et la commande
+   elle-même, avec les mêmes règles que la station. Au moindre doute, elle
+   refuse et ne publie rien ;
+3. elle crée l'`id` (16 caractères aléatoires : le navigateur n'en fournit
+   pas), se connecte au broker avec `web-command`, publie en QoS 1, attend
+   l'accusé de réception du broker, se déconnecte, et renvoie l'`id` à la page ;
+4. la station valide à nouveau, exécute et répond sur `replies` ;
+5. la page, abonnée à `replies` avec `web-viewer`, retrouve la réponse par son
+   `id`. Sans réponse en 10 s, elle l'affiche, en rappelant qu'une commande
+   envoyée hors ligne est perdue.
 
 **Validation par l'ESP32**, même si la route API a déjà validé : tout ce qui
 n'est pas prévu est refusé.

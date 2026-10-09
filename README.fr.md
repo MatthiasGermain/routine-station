@@ -8,8 +8,8 @@ qu'une page web les affiche en direct et renvoie des ordres. Quand on touche
 l'arrêt d'urgence, l'alarme et l'arrêt du moteur sont gérés sur la carte en
 temps réel, avec ou sans réseau.
 
-**État :** étape 4 sur 6 terminée (la station est en direct sur le site). Voir
-la [feuille de route](#feuille-de-route).
+**État :** étape 5 sur 6 terminée (la station est en direct sur le site et
+reçoit ses ordres). Voir la [feuille de route](#feuille-de-route).
 
 ## Démo
 
@@ -17,6 +17,10 @@ La station en direct : [matthias-germain.vercel.app/routine](https://matthias-ge
 (vue publique, en lecture seule ; [en anglais](https://matthias-germain.vercel.app/en/routine)).
 
 ![La page /routine publique, avec la station en direct](docs/assets/04-page-en-direct.png)
+
+La vue propriétaire, derrière un mot de passe, y ajoute les commandes (étape 5) :
+
+![Le bandeau Station de la vue propriétaire, avec les commandes du moteur, de l'alarme et du seuil](docs/assets/05-commandes-web.png)
 
 _Le GIF de démo arrive à l'étape 6._
 
@@ -62,20 +66,24 @@ Tout vient d'un kit de démarrage Arduino UNO, plus une carte ESP32.
 | Module tactile capacitif TTP223 | Arrêt d'urgence |
 | Moteur pas-à-pas 28BYJ-48 + driver ULN2003 | Moteur |
 | LED, buzzer | Alarme |
+| LED bleue de la carte ESP32 | Alerte de température |
 
 Câblage broche par broche : [docs/wiring.md](docs/wiring.md).
 
 ## Fonctionnement
 
-_Rempli au fil des étapes._ Le plan :
+_Complété à l'étape 6._ Pour l'instant :
 
 - Le firmware échantillonne les capteurs, pilote le moteur et publie les mesures
-  en MQTT.
+  en MQTT. Une alerte de température, dont le seuil se règle depuis le web,
+  allume la LED bleue de la carte.
 - La page `/routine` s'abonne à ces mesures avec un utilisateur MQTT en
   lecture seule et les affiche en direct (étape 4).
-- Les commandes (démarrer ou arrêter le moteur, déclencher ou couper l'alarme,
-  régler des seuils) partiront de la page, passeront par une route API protégée,
-  puis par le broker, jusqu'à l'ESP32 (étape 5).
+- Les commandes (faire tourner ou arrêter le moteur, tester l'alarme, couper son
+  buzzer, régler le seuil de température) partent de boutons de la vue
+  propriétaire, passent par une route API côté serveur protégée par la session
+  du propriétaire, puis par le broker, jusqu'à l'ESP32. La station les vérifie à
+  nouveau et répond ; la page rapproche chaque réponse de sa commande (étape 5).
 
 Les topics MQTT et les messages JSON sont spécifiés dans
 [docs/protocol.md](docs/protocol.md) (rempli à l'étape 3). C'est la référence
@@ -95,6 +103,7 @@ Une note courte par décision importante, dans
 - [0006 : PubSubClient comme client MQTT](docs/decisions/0006-pubsubclient.md)
 - [0007 : le moteur dans sa propre tâche FreeRTOS](docs/decisions/0007-moteur-tache-freertos.md)
 - [0008 : un arrêt d'urgence tactile à la place du capteur de flamme](docs/decisions/0008-arret-urgence-tactile.md)
+- [0009 : la session par mot de passe protège aussi les commandes](docs/decisions/0009-session-mot-de-passe-commandes.md)
 
 ## Garanties temps réel
 
@@ -136,10 +145,16 @@ _Mis en place aux étapes 3 à 5._ La conception :
 - Le broker a trois utilisateurs, chacun limité à ses propres topics : la
   station (étape 3), un en lecture seule utilisé par la page publique (étape 4),
   et un de commande utilisé uniquement par une route API côté serveur (étape 5).
-- La route API vérifie que le propriétaire est connecté et valide chaque
-  commande : type autorisé, valeurs dans les bornes. Depuis l'étape 4, la partie
-  propriétaire de `/routine` est derrière une session à mot de passe ; reste à
-  décider à l'étape 5 si cette même session protège les commandes.
+- La partie propriétaire de `/routine` est derrière une session à mot de passe
+  (étape 4). La même session protège la route API des commandes
+  ([décision 0009](docs/decisions/0009-session-mot-de-passe-commandes.md)),
+  qui vérifie aussi que la requête vient du site lui-même et valide chaque
+  commande : type autorisé, valeurs dans les bornes. Elle publie avec
+  l'utilisateur de commande, qui ne peut publier que sur le topic des
+  commandes.
+- Ni double authentification ni limite de tentatives : la sécurité physique
+  reste sur la carte. L'arrêt d'urgence ne se réarme que sur place, et le moteur
+  est refusé pendant une alarme, quoi que le site envoie.
 - L'ESP32 valide à nouveau chaque commande et communique avec le broker en TLS.
 - Aucun secret n'est commité : le vrai fichier de configuration est ignoré par
   git et un fichier exemple est commité à sa place.
@@ -158,8 +173,9 @@ _Mis en place aux étapes 3 à 5._ La conception :
 - [x] **Étape 4, page `/routine` en direct** : dans le dépôt du site ; la
   station en direct dans une vue publique en lecture seule, le tableau de bord
   du propriétaire derrière un mot de passe (`v0.4-live-page`)
-- [ ] **Étape 5, commandes depuis le web** : route API protégée par login
-  (`v0.5-commands`)
+- [x] **Étape 5, commandes depuis le web** : moteur, alarme et seuil de
+  température depuis la vue propriétaire, via une route API protégée par la
+  session à mot de passe (`v0.5-commands`)
 - [ ] **Étape 6, finition** : README complet, schéma de câblage, GIF de démo,
   bilan (`v1.0`)
 

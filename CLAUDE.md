@@ -41,9 +41,10 @@ ajoute une section, elle ne remplace rien.
     `docs/protocol.md`) : `station` (l'ESP32), `web-viewer` en lecture seule
     (utilisé par la page, son mot de passe est donc public) et `web-command`
     (utilisé uniquement par une route API Vercel côté serveur)
-  - la route API vérifie que Matthias est connecté (Auth.js ou équivalent pour
-    Astro, à choisir à l'étape 5 ; connexion GitHub limitée à son compte) et
-    valide chaque commande (type autorisé, valeurs dans les bornes)
+  - la route API (`POST /api/station/command` sur le site) vérifie la session
+    par mot de passe de `/routine`, celle de la vue propriétaire (décision
+    0009, à la place d'Auth.js et d'une connexion GitHub), puis valide chaque
+    commande (type autorisé, valeurs dans les bornes)
   - l'ESP32 valide aussi chaque commande reçue et se connecte au broker en TLS
 
 ## Contraintes

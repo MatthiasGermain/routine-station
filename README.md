@@ -8,8 +8,8 @@ live and sends commands back. When someone touches the emergency stop, the
 alarm and the motor stop are handled on the board in real time, with or without
 a network.
 
-**Status:** step 4 of 6 done (the station is live on the website). See the
-[roadmap](#roadmap).
+**Status:** step 5 of 6 done (the station is live on the website and takes
+commands from it). See the [roadmap](#roadmap).
 
 ## Demo
 
@@ -17,6 +17,10 @@ The station, live: [matthias-germain.vercel.app/routine](https://matthias-germai
 (public, read-only view; [in English](https://matthias-germain.vercel.app/en/routine)).
 
 ![The public /routine page showing the station live](docs/assets/04-page-en-direct.png)
+
+The owner view, behind a password, adds the commands (step 5):
+
+![The Station band of the owner view, with the motor, alarm and threshold commands](docs/assets/05-commandes-web.png)
 
 _The demo GIF arrives at step 6._
 
@@ -62,20 +66,24 @@ Everything comes from an Arduino UNO starter kit plus an ESP32 board.
 | TTP223 capacitive touch module | Emergency stop |
 | 28BYJ-48 stepper motor + ULN2003 driver | Motor |
 | LED, buzzer | Alarm |
+| Blue LED on the ESP32 board | Temperature alert |
 
 Pin-by-pin wiring: [docs/wiring.md](docs/wiring.md) (in French).
 
 ## How it works
 
-_Filled in as the steps land._ The plan:
+_Completed at step 6._ So far:
 
 - The firmware samples the sensors, drives the motor and publishes measurements
-  over MQTT.
+  over MQTT. A temperature alert, with a threshold set from the web, lights the
+  blue LED of the board.
 - The `/routine` page subscribes to those measurements with a read-only MQTT
   user and displays them live (step 4).
-- Commands (start or stop the motor, trigger or silence the alarm, set
-  thresholds) will go from the page through a protected API route to the broker,
-  then to the ESP32 (step 5).
+- Commands (run or stop the motor, test the alarm, silence its buzzer, set the
+  temperature threshold) go from buttons in the owner view, through a
+  server-side API route protected by the owner's session, to the broker, then
+  to the ESP32. The station checks them again and replies; the page matches the
+  reply to its command (step 5).
 
 The MQTT topics and JSON payloads are specified in
 [docs/protocol.md](docs/protocol.md) (in French, filled in at step 3). It is the
@@ -95,6 +103,7 @@ French):
 - [0006: PubSubClient as the MQTT client](docs/decisions/0006-pubsubclient.md)
 - [0007: the motor in its own FreeRTOS task](docs/decisions/0007-moteur-tache-freertos.md)
 - [0008: a touch emergency stop instead of the flame sensor](docs/decisions/0008-arret-urgence-tactile.md)
+- [0009: the password session also protects the commands](docs/decisions/0009-session-mot-de-passe-commandes.md)
 
 ## Real-time guarantees
 
@@ -134,10 +143,15 @@ _Implemented at steps 3 to 5._ The design:
 - The broker has three users, each restricted to its own topics: the station
   (step 3), a read-only one used by the public page (step 4), and a command one
   used only by a server-side API route (step 5).
-- The API route checks that the owner is logged in and validates every command:
-  allowed type, values within bounds. Since step 4, the owner side of `/routine`
-  sits behind a password session; whether the same session protects the
-  commands is decided at step 5.
+- The owner side of `/routine` sits behind a password session (step 4). The
+  same session protects the command API route
+  ([decision 0009](docs/decisions/0009-session-mot-de-passe-commandes.md)),
+  which also checks that the request comes from the site itself and validates
+  every command: allowed type, values within bounds. It publishes with the
+  command user, allowed to publish on the commands topic only.
+- No two-factor login and no attempt limit: physical safety stays on the board.
+  The emergency stop can only be reset on site, and the motor is refused during
+  an alarm, whatever the website sends.
 - The ESP32 validates every command again and talks to the broker over TLS.
 - No secret is committed: the real configuration file is git-ignored and an
   example file is committed in its place.
@@ -156,8 +170,9 @@ _Implemented at steps 3 to 5._ The design:
 - [x] **Step 4, live `/routine` page**: in the website repository; the
   station live in a public, read-only view, the owner dashboard behind a
   password (`v0.4-live-page`)
-- [ ] **Step 5, commands from the web**: API route protected by login
-  (`v0.5-commands`)
+- [x] **Step 5, commands from the web**: motor, alarm and temperature
+  threshold from the owner view, through an API route protected by the
+  password session (`v0.5-commands`)
 - [ ] **Step 6, polish**: complete README, wiring diagram, demo GIF, wrap-up
   (`v1.0`)
 
