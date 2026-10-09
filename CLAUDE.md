@@ -16,8 +16,11 @@ section « Station » de la
 page `/routine` du site de Matthias affiche les mesures en direct et permet
 d'envoyer des ordres.
 
-Le site est **dans un autre repo**, `portfolio` (Astro + TypeScript, hébergé sur
-Vercel). La page `/routine` y existe déjà : c'est le tableau de bord personnel
+Le site est **dans un autre repo**, `MatthiasGermain` (le repo de profil
+GitHub, qui contient aussi le site : Astro + TypeScript, hébergé sur Vercel,
+https://matthias-germain.vercel.app). Ses commits sont en français, au format
+« Section : description ». Le repo `portfolio` est l'ancienne version du site,
+on n'y touche pas. La page `/routine` existe déjà : c'est le tableau de bord personnel
 de Matthias (planning de la journée, tâches Notion en cours). La station y
 ajoute une section, elle ne remplace rien.
 
@@ -68,14 +71,14 @@ ajoute une section, elle ne remplace rien.
 | 1 | Capteurs et moteur en local, résultats dans le moniteur série | `v0.1-sensors` |
 | 2 | Alarme temps réel : tâche FreeRTOS haute priorité qui surveille le capteur, temps de réaction mesuré et documenté (capteur de flamme, remplacé ensuite par l'arrêt d'urgence tactile) | `v0.2-alarm` |
 | 3 | Connexion au broker cloud : Wi-Fi, MQTT en TLS, reconnexion automatique, publication des mesures, réception des commandes | `v0.3-mqtt` |
-| 4 | Section « Station » de la page `/routine` : affichage en direct (dans le repo `portfolio`) | `v0.4-live-page` |
-| 5 | Commandes depuis le web : route API protégée par login (dans le repo `portfolio`) | `v0.5-commands` |
+| 4 | Section « Station » de la page `/routine` : affichage en direct (dans le repo `MatthiasGermain`) | `v0.4-live-page` |
+| 5 | Commandes depuis le web : route API protégée par login (dans le repo `MatthiasGermain`) | `v0.5-commands` |
 | 6 | Finition : README complet, schéma de câblage, GIF/vidéo de démo, bilan | `v1.0` |
 
 L'étape en cours se lit dans la feuille de route du [README](README.md#roadmap)
 et dans le dernier fichier de `docs/journal/`.
 
-Les étapes 4 et 5 se codent dans `portfolio`, mais leur tag est posé **ici**,
+Les étapes 4 et 5 se codent dans `MatthiasGermain`, mais leur tag est posé **ici**,
 sur le commit qui met à jour la feuille de route, le journal de l'étape et, si
 besoin, `docs/protocol.md`. Le journal renvoie vers les commits du site.
 

@@ -1,7 +1,7 @@
 # Protocole ESP32 ↔ web
 
 Ce document est le contrat entre le firmware de la station et la section
-« Station » de la page `/routine` du site (repo `portfolio`) : topics MQTT,
+« Station » de la page `/routine` du site (repo `MatthiasGermain`) : topics MQTT,
 format JSON des mesures et des commandes.
 C'est la référence commune aux deux dépôts. Si le firmware et le site ne sont
 pas d'accord, c'est ce fichier qui a raison.
