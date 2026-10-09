@@ -1,7 +1,7 @@
-// Sensors of the station: temperature, ambient light and flame.
+// Sensors of the station: temperature and ambient light.
 //
-// Readings are converted with the ADC calibration burnt into the chip, so the
-// values are in real units.
+// Readings are averaged over several samples and converted with the ADC
+// calibration burnt into the chip, so the values are in real units.
 
 #pragma once
 
@@ -15,13 +15,5 @@ struct SensorReadings {
 // Sets up the ADC inputs. Call once from setup().
 void sensorsBegin();
 
-// Reads temperature and light, each averaged over several samples. Takes a few
-// milliseconds.
+// Reads temperature and light. Takes a few milliseconds.
 SensorReadings sensorsRead();
-
-// Single samples in millivolts, for the alarm task, which reads them every
-// 2 ms and does its own averaging (see src/alarm.cpp).
-// Flame sensor: the more infrared, the higher. Only the alarm task reads it.
-uint32_t sensorsReadFlameMilliVolts();
-// Photoresistor: the more visible light, the higher.
-uint32_t sensorsReadLightMilliVolts();

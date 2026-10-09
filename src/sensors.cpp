@@ -33,10 +33,9 @@ void sensorsBegin() {
   // that is 10 to 95 degrees, plenty for a room.
   analogSetPinAttenuation(PIN_TEMPERATURE, ADC_0db);
 
-  // The two dividers swing over the whole 0 to 3.3 V range: 11 dB attenuation
-  // (the default, set here to make it explicit) covers it.
+  // The photoresistor divider swings over the whole 0 to 3.3 V range: 11 dB
+  // attenuation (the default, set here to make it explicit) covers it.
   analogSetPinAttenuation(PIN_LIGHT, ADC_11db);
-  analogSetPinAttenuation(PIN_FLAME, ADC_11db);
 }
 
 SensorReadings sensorsRead() {
@@ -51,12 +50,4 @@ SensorReadings sensorsRead() {
   readings.lightPercent = lightPercent > 100 ? 100 : lightPercent;
 
   return readings;
-}
-
-uint32_t sensorsReadFlameMilliVolts() {
-  return analogReadMilliVolts(PIN_FLAME);
-}
-
-uint32_t sensorsReadLightMilliVolts() {
-  return analogReadMilliVolts(PIN_LIGHT);
 }

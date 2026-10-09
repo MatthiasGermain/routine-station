@@ -62,7 +62,6 @@ size_t messageMeasurements(char *out, size_t size,
   doc["uptime_s"] = uptimeSeconds;
   doc["temperature_c"] = roundf(readings.temperatureC * 10) / 10;
   doc["light_pct"] = readings.lightPercent;
-  doc["flame_rise_mv"] = alarm.flameRiseMilliVolts;
   doc["alarm"] = alarmStateName(alarm.state);
   doc["motor"] = motorStateName(motor);
   doc["rssi_dbm"] = rssi;
@@ -75,9 +74,8 @@ size_t messageEvent(char *out, size_t size, const AlarmEvent &event,
   setTime(doc, eventTime);
   if (event.type == AlarmEventType::Raised) {
     doc["type"] = "alarm_raised";
-    doc["flame_rise_mv"] = event.flameRiseMilliVolts;
-    const float reactionMs = (event.reactedAtUs - event.detectedAtUs) / 1000.0f;
-    doc["reaction_ms"] = roundf(reactionMs * 10) / 10;
+    doc["cause"] = "touch";
+    doc["reaction_us"] = event.reactedAtUs - event.detectedAtUs;
   } else {
     doc["type"] = "alarm_cleared";
   }

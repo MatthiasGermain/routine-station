@@ -4,7 +4,7 @@
 // Reconnects by itself: the Wi-Fi driver retries on its own, and the broker
 // connection is retried with growing delays (2 s, 4 s, 8 s... up to 60 s).
 // loop() is only blocked while connecting to the broker (a few seconds, under
-// 30 s when the network does not answer): the flame alarm and the motor run
+// 30 s when the network does not answer): the alarm and the motor run
 // in their own tasks and do not depend on it.
 // See docs/decisions/0006-pubsubclient.md.
 

@@ -23,6 +23,6 @@ size_t messageMeasurements(char *out, size_t size,
                            const AlarmStatus &alarm, MotorState motor,
                            uint32_t uptimeSeconds, time_t now, int rssi);
 
-// routine/station/events (alarm raised or cleared)
+// routine/station/events (emergency stop raised or reset)
 size_t messageEvent(char *out, size_t size, const AlarmEvent &event,
                     time_t eventTime);

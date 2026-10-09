@@ -1,19 +1,18 @@
 // routine-station firmware
 //
-// Step 3: connected station. On top of the real-time flame alarm of step 2
-// (src/alarm.cpp), the station connects to the MQTT broker over TLS
-// (src/network.cpp). It publishes its measurements every 5 s and the alarm
-// events (src/messages.cpp), and carries out the commands it receives
-// (src/commands.cpp), as described in docs/protocol.md. The motor only turns
-// on command.
+// Connected station. A real-time alarm, an emergency stop on a touch module
+// (src/alarm.cpp), locks the motor within microseconds of a touch. The station
+// connects to the MQTT broker over TLS (src/network.cpp), publishes its
+// measurements every 5 s and the alarm events (src/messages.cpp), and carries
+// out the commands it receives (src/commands.cpp), as described in
+// docs/protocol.md. The motor only turns on command.
 //
-// Three FreeRTOS tasks share core 1, by priority: the flame alarm (10), the
-// motor (5), then loop() (1). loop() handles everything that may wait: the
-// network, which can block it for seconds while reconnecting, the messages,
-// the serial monitor. It never calls delay() (apart from the stall
-// experiment): each part checks whether it is its turn and returns at once.
-// Keys typed in the serial monitor:
-// - 'c' records 5 s of raw sensor samples (src/capture.cpp);
+// Three FreeRTOS tasks share core 1, by priority: the alarm (10), the motor
+// (5), then loop() (1). loop() handles everything that may wait: the network,
+// which can block it for seconds while reconnecting, the messages, the serial
+// monitor. It never calls delay() (apart from the stall experiment): each part
+// checks whether it is its turn and returns at once. Keys typed in the serial
+// monitor:
 // - 's' turns the stall experiment on or off (see SIMULATED_STALL_MS);
 // - 'n' simulates a network outage (see SIMULATED_OUTAGE_S).
 
@@ -21,7 +20,6 @@
 #include <esp_timer.h>
 
 #include "alarm.h"
-#include "capture.h"
 #include "commands.h"
 #include "messages.h"
 #include "motor.h"
@@ -37,7 +35,7 @@ const unsigned long PUBLISH_INTERVAL_MS = 5000;
 
 // Experiment of the step 2 journal: once turned on with 's', every pass of
 // loop() stalls this long, like a slow network call, to check that the alarm
-// still reacts within milliseconds.
+// does not depend on it.
 const unsigned long SIMULATED_STALL_MS = 500;
 bool stallExperiment = false;
 
@@ -69,10 +67,10 @@ void onCommand(const uint8_t *payload, size_t length) {
   networkPublishReply(reply);
 }
 
-// Prints the events sent by the alarm task, and publishes the alarm ones.
+// Prints the events sent by the alarm task, and publishes them.
 // For a raised alarm, two delays:
-// - the task: from the first sample over the threshold to the outputs on;
-// - loop(): how long after that same sample loop() got to it. An alarm
+// - the task: from the touch interrupt to the outputs on;
+// - loop(): how long after that same interrupt loop() got to it. An alarm
 //   checked in loop() could not have reacted any sooner.
 void handleAlarmEvents() {
   AlarmEvent event;
@@ -81,18 +79,11 @@ void handleAlarmEvents() {
     switch (event.type) {
       case AlarmEventType::Raised:
         Serial.printf(
-            ">>> ALARM  flame %+d mV, light %+d mV  reaction: task %.2f ms, "
-            "loop %.2f ms\n",
-            event.flameRiseMilliVolts, event.lightRiseMilliVolts,
-            (event.reactedAtUs - event.detectedAtUs) / 1000.0, agoUs / 1000.0);
+            ">>> EMERGENCY STOP  reaction: task %lld us, loop %.2f ms\n",
+            event.reactedAtUs - event.detectedAtUs, agoUs / 1000.0);
         break;
-      case AlarmEventType::Ignored:
-        Serial.printf(
-            ">>> ignored, daylight changed  flame %+d mV, light %+d mV\n",
-            event.flameRiseMilliVolts, event.lightRiseMilliVolts);
-        continue;  // local diagnostic only, not part of the protocol
       case AlarmEventType::Cleared:
-        Serial.println(">>> alarm cleared");
+        Serial.println(">>> emergency stop reset (long touch)");
         break;
     }
 
@@ -110,13 +101,6 @@ void handleAlarmEvents() {
 void handleSerialInput() {
   while (Serial.available() > 0) {
     switch (Serial.read()) {
-      case 'c':
-        if (captureStart()) {
-          Serial.println(">>> capture started: 5 s of raw samples");
-        } else {
-          Serial.println(">>> capture already in progress");
-        }
-        break;
       case 's':
         stallExperiment = !stallExperiment;
         Serial.printf(">>> stall experiment %s: loop() stalls %lu ms per pass\n",
@@ -156,14 +140,12 @@ void reportIfDue() {
   }
   lastReportMs = millis();
 
-  // The rises are the gaps with the slow reference levels of the alarm task.
   const SensorReadings readings = sensorsRead();
   const AlarmStatus alarm = alarmStatus();
   Serial.printf(
-      "temp=%.1f C  light=%u %% (%+d mV)  flame %+d mV  alarm=%s  motor=%s  "
-      "net=%s\n",
-      readings.temperatureC, readings.lightPercent, alarm.lightRiseMilliVolts,
-      alarm.flameRiseMilliVolts, alarmStateName(alarm.state),
+      "temp=%.1f C  light=%u %%  touch=%s  alarm=%s  motor=%s  net=%s\n",
+      readings.temperatureC, readings.lightPercent,
+      alarm.touched ? "yes" : "no", alarmStateName(alarm.state),
       motorStateName(motorState()), networkStateName(networkState()));
 }
 
@@ -175,7 +157,7 @@ void setup() {
   networkBegin(onCommand);
 
   Serial.println();
-  Serial.println("routine-station: step 3, connected station");
+  Serial.println("routine-station: connected station, touch emergency stop");
 }
 
 void loop() {
@@ -184,7 +166,6 @@ void loop() {
   networkUpdate();
   publishIfDue();
   reportIfDue();
-  capturePrintIfReady();
 
   if (stallExperiment) {
     delay(SIMULATED_STALL_MS);

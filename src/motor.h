@@ -6,7 +6,7 @@
 // See docs/decisions/0002-pilote-moteur-maison.md and
 // docs/decisions/0007-moteur-tache-freertos.md.
 //
-// Safe to call from several tasks: the flame alarm task stops the motor while
+// Safe to call from several tasks: the alarm task stops the motor while
 // the motor task may be in the middle of a step.
 
 #pragma once
@@ -27,7 +27,7 @@ bool motorRun(bool forward);
 void motorStop();
 
 // Locking stops the motor at once and refuses to run until it is unlocked.
-// Used by the flame alarm. Unlocking does not restart the motor.
+// Used by the alarm. Unlocking does not restart the motor.
 void motorSetLocked(bool locked);
 
 bool motorIsLocked();
