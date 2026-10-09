@@ -30,7 +30,7 @@ Broker : **EMQX Serverless**, offre gratuite, région Europe (Francfort)
 
 | Utilisateur | Utilisé par | Peut publier | Peut s'abonner | Créé à l'étape |
 |-------------|-------------|--------------|----------------|----------------|
-| `station` | l'ESP32 | `measurements`, `events`, `status`, `replies` | `commands` | 3 |
+| `station` | l'ESP32 | `measurements`, `events`, `status`, `replies`, `samples` (étape 6) | `commands` | 3 |
 | `web-viewer` | la page, dans le navigateur | rien | `measurements`, `events`, `status`, `replies` | 4 |
 | `web-command` | la route API, côté serveur | `commands` | rien | 5 |
 
@@ -64,6 +64,7 @@ Tous les topics commencent par `routine/station/`.
 | `routine/station/status` | station → web | 1 | oui | à la connexion, et par le broker à la déconnexion |
 | `routine/station/commands` | web → station | 1 | non | à chaque ordre |
 | `routine/station/replies` | station → web | 0 | non | en réponse à chaque commande |
+| `routine/station/samples` | station → base de données (par le broker et le site) | 0 | non | toutes les 5 min, à heure ronde |
 
 - **QoS 0** : le message est envoyé une fois, sans accusé de réception. Une
   mesure perdue est remplacée 5 s plus tard.
@@ -148,6 +149,53 @@ Topic `routine/station/events`, envoyés aussitôt.
 L'alarme et l'alerte de température réagissent sur la carte sans attendre le
 réseau : l'événement part dès que la connexion le permet, il peut donc arriver
 après coup.
+
+## Historique : les échantillons (station → base de données)
+
+Topic `routine/station/samples`, toutes les 5 min, non retenu. Ces messages ne
+sont pas destinés à la page : le broker les transmet au site, qui les range
+dans une base de données. Les graphes lisent ensuite cette base.
+
+```json
+{ "time": "2026-10-09T10:05:00Z", "temperature_c": 24.3, "light_pct": 51 }
+```
+
+| Champ | Type | Sens |
+|-------|------|------|
+| `time` | chaîne ISO 8601 UTC | **début** de la tranche de 5 min, toujours à heure ronde (10:00, 10:05, 10:10…) |
+| `temperature_c` | nombre, 1 décimale | moyenne de la température sur la tranche |
+| `light_pct` | entier 0 à 100 | moyenne de la lumière sur la tranche |
+
+- La station lit ses capteurs chaque seconde et fait la moyenne de chaque
+  tranche de 5 min. Les tranches sont calées sur l'horloge pour tomber juste
+  sur les heures et les jours des graphes.
+- **Pas d'échantillon tant que l'heure n'est pas connue** (NTP) : sans heure,
+  il ne pourrait pas être rangé. Une tranche entamée moins d'une minute avant sa
+  fin (démarrage, heure tout juste reçue) est abandonnée.
+- **Pendant une coupure réseau**, la station garde jusqu'à 24 échantillons
+  (2 h) et les envoie à la reconnexion ; au-delà, elle oublie les plus anciens.
+  Chaque échantillon porte son heure : il se range au bon endroit même s'il
+  arrive en retard.
+
+Le chemin d'un échantillon (étape 6) :
+
+1. la station publie sur `routine/station/samples` ;
+2. une **règle EMQX** (`SELECT payload FROM "routine/station/samples"`, action
+   « HTTP Server ») l'envoie en `POST` à la route du site
+   `/api/station/samples`, avec un jeton secret dans l'en-tête
+   `Authorization: Bearer …` (variable `STATION_INGEST_TOKEN` côté Vercel) ;
+3. la route vérifie le jeton et valide l'échantillon comme ci-dessus (heure
+   ronde, pas dans le futur, valeurs dans les bornes), puis l'enregistre dans
+   la table `station_samples` d'une base Postgres (Supabase). L'heure est la
+   clé de la table : un échantillon reçu deux fois n'est enregistré qu'une
+   fois ;
+4. la route publique `GET /api/station/history?range=24h|7d|30d|1y` renvoie
+   les points des graphes : les échantillons de 5 min sur 24 h, des moyennes par
+   heure sur 7 et 30 jours, par jour sur un an. Elle est mise en cache 5 min par
+   Vercel.
+
+La table a la sécurité au niveau des lignes (RLS) activée, sans aucune règle
+d'accès : seul le serveur du site, avec la connexion Postgres, y lit et écrit.
 
 ## Commandes (web → station)
 

@@ -29,6 +29,10 @@ ajoute une section, elle ne remplace rien.
   matérielle). Il remplace le capteur de flamme, abandonné après l'étape 3 : en
   plein jour, il ne distinguait pas une flamme du soleil (décision 0008)
 - **Actions** : moteur pas-à-pas 28BYJ-48 via driver ULN2003, LED, buzzer
+- **Historique** (étape 6) : toutes les 5 min, la station publie la moyenne de
+  ses mesures ; le broker la transmet au site, qui la range dans une base
+  Postgres (Supabase, créée depuis Vercel). Les graphes de la vue visiteur
+  lisent cette base. Détail dans `docs/protocol.md`
 - **Ordres depuis le web** : faire tourner / arrêter le moteur, déclencher /
   couper l'alarme, régler le seuil d'alerte de température (alerte de
   supervision : LED bleue intégrée et événement, pas un arrêt d'urgence)
@@ -91,8 +95,8 @@ README.md / README.fr.md   README bilingue (anglais principal, français en miro
 platformio.ini             configuration de la carte et de la chaîne de compilation
 include/pins.h             toutes les broches au même endroit
 src/                       un module par responsabilité, à plat :
-                           sensors, motor, alarm, temperature_alert, network,
-                           messages, commands
+                           sensors, motor, alarm, temperature_alert, samples,
+                           network, messages, commands
                            (+ main.cpp)
 docs/protocol.md           contrat ESP32 <-> web (topics MQTT, JSON), référence
                            commune avec le repo du site
@@ -106,7 +110,7 @@ docs/assets/               photos, captures, GIF
 
 - **Langues** :
   - code en anglais : identifiants, commentaires, messages série
-  - commits, tags et issues en anglais
+  - commits et tags en anglais
   - `README.md` en anglais, `README.fr.md` en français, à garder synchronisés
   - `docs/` et ce fichier en français
 - **Code** : simple, lisible et commenté. La clarté avant l'astuce. Un module
@@ -117,7 +121,8 @@ docs/assets/               photos, captures, GIF
 - **Décisions** (`docs/decisions/NNNN-titre.md`) : contexte → décision →
   alternatives écartées → conséquences. Gabarit dans `0000-modele.md`.
 - **Git** : commits conventionnels (`feat:`, `fix:`, `docs:`, `chore:`…), un tag
-  par étape terminée, une issue GitHub par étape.
+  par étape terminée. Pas d'issues GitHub : chaque étape est racontée par son
+  journal.
 
 ## Règles de travail
 
