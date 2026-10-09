@@ -81,7 +81,9 @@ Topic `routine/station/measurements`, toutes les 5 s, retenu.
   "light_pct": 88,
   "alarm": "off",
   "motor": "stopped",
-  "rssi_dbm": -61
+  "rssi_dbm": -61,
+  "temperature_threshold_c": 30,
+  "temperature_high": false
 }
 ```
 
@@ -94,6 +96,8 @@ Topic `routine/station/measurements`, toutes les 5 s, retenu.
 | `alarm` | `"off"`, `"on"`, `"silenced"`, `"test"` | état de l'alarme (voir plus bas) |
 | `motor` | `"stopped"`, `"forward"`, `"backward"`, `"locked"` | état du moteur ; `locked` pendant une alarme ou un test |
 | `rssi_dbm` | entier | force du signal Wi-Fi, utile pour diagnostiquer |
+| `temperature_threshold_c` | entier 10 à 40 | seuil d'alerte de température en vigueur (voir plus bas) |
+| `temperature_high` | booléen | `true` pendant une alerte de température |
 
 États de l'alarme :
 
@@ -105,6 +109,19 @@ Topic `routine/station/measurements`, toutes les 5 s, retenu.
 - `test` : test lancé par une commande, LED et buzzer pendant 3 s, moteur
   bloqué.
 
+Alerte de température :
+
+- elle commence quand la température reste **au-dessus du seuil ou égale** à
+  lui pendant 5 s, et finit quand elle reste **1 °C sous le seuil** pendant
+  5 s : ce délai et cet écart empêchent le bruit du capteur de la faire
+  clignoter au voisinage du seuil ;
+- sur la carte, la LED bleue intégrée est allumée pendant l'alerte ;
+- c'est une alerte de **supervision**, pas un arrêt d'urgence : ni buzzer, ni
+  moteur bloqué ;
+- le seuil se règle par une commande (voir plus bas). La station le garde en
+  mémoire flash : il survit à un redémarrage. Au tout premier démarrage, il
+  vaut 30 °C.
+
 ## Événements (station → web)
 
 Topic `routine/station/events`, envoyés aussitôt.
@@ -112,15 +129,20 @@ Topic `routine/station/events`, envoyés aussitôt.
 ```json
 { "time": "2026-10-09T10:31:12Z", "type": "alarm_raised", "cause": "touch", "reaction_us": 42 }
 { "time": "2026-10-09T10:32:05Z", "type": "alarm_cleared" }
+{ "time": "2026-10-09T15:02:40Z", "type": "temperature_high", "temperature_c": 28.3, "threshold_c": 28 }
+{ "time": "2026-10-09T15:09:12Z", "type": "temperature_normal", "temperature_c": 26.8, "threshold_c": 28 }
 ```
 
 | `type` | Champs en plus |
 |--------|----------------|
 | `alarm_raised` | `cause` : `"touch"` (le module tactile) ; `reaction_us` : temps de réaction du firmware, de l'interruption aux sorties activées, en microsecondes |
 | `alarm_cleared` | aucun : l'arrêt d'urgence a été réarmé par un appui long sur place |
+| `temperature_high` | `temperature_c` (nombre, 1 décimale) et `threshold_c` (entier) : début d'une alerte de température |
+| `temperature_normal` | mêmes champs : fin de l'alerte |
 
-L'alarme réagit sur la carte sans attendre le réseau : l'événement part dès que
-la connexion le permet, il peut donc arriver après coup.
+L'alarme et l'alerte de température réagissent sur la carte sans attendre le
+réseau : l'événement part dès que la connexion le permet, il peut donc arriver
+après coup.
 
 ## Commandes (web → station)
 
@@ -131,6 +153,7 @@ Topic `routine/station/commands`, QoS 1.
 { "id": "k3f9a3", "type": "motor", "action": "stop" }
 { "id": "k3f9a4", "type": "alarm", "action": "test" }
 { "id": "k3f9a5", "type": "alarm", "action": "silence" }
+{ "id": "k3f9a6", "type": "threshold", "action": "set", "temperature_c": 28 }
 ```
 
 | `type` | `action` | Autres champs | Effet |
@@ -139,6 +162,7 @@ Topic `routine/station/commands`, QoS 1.
 | `motor` | `stop` | aucun | le moteur s'arrête, bobines coupées |
 | `alarm` | `test` | aucun | LED, buzzer et moteur bloqué pendant 3 s |
 | `alarm` | `silence` | aucun | coupe le buzzer d'une alarme en cours |
+| `threshold` | `set` | `temperature_c` : entier de 10 à 40 | règle le seuil d'alerte de température, gardé en mémoire flash |
 
 Une commande envoyée pendant que la station est hors ligne est **perdue** : la
 station se connecte sans session persistante, et le broker ne lui garde rien.
@@ -151,6 +175,8 @@ n'est pas prévu est refusé.
 - message de 256 octets au plus, JSON valide ;
 - `id` obligatoire : chaîne de 1 à 32 caractères, renvoyée dans la réponse ;
 - `type`, `action` et `direction` uniquement parmi les valeurs du tableau ;
+- `temperature_c` : un entier écrit sans décimale (`28` ; `28.0`, `28.5`,
+  `"28"` ou `true` sont refusés), de 10 à 40 ;
 - aucun champ en plus de ceux prévus pour la commande.
 
 **Règles de sécurité**, appliquées par l'ESP32 :
@@ -159,6 +185,8 @@ n'est pas prévu est refusé.
 - `alarm silence` ne coupe que le buzzer : la LED reste allumée et le moteur
   reste bloqué ;
 - `alarm test` est refusé pendant un arrêt d'urgence ;
+- `threshold set` est accepté à tout moment, même pendant un arrêt d'urgence :
+  changer un seuil n'a rien de dangereux ;
 - **aucune commande ne peut réarmer un arrêt d'urgence** : seul un appui long
   (2 s) sur le module tactile, sur place, le fait. On ne relance pas à distance
   une machine que personne ne voit
@@ -178,7 +206,8 @@ Topic `routine/station/replies`, une réponse par commande reçue.
 | `too_long` | message de plus de 256 octets |
 | `invalid_json` | JSON illisible |
 | `invalid_id` | `id` absent ou invalide (la réponse a alors `"id": null`) |
-| `invalid_command` | `type`, `action`, `direction` inconnus, ou champ en trop |
+| `invalid_command` | `type`, `action`, `direction` inconnus, champ manquant ou en trop, `temperature_c` qui n'est pas un entier |
+| `out_of_range` | `temperature_c` hors de 10 à 40 |
 | `alarm_active` | refusé pendant un arrêt d'urgence ou un test |
 | `nothing_to_silence` | `silence` alors qu'aucune alarme ne sonne |
 

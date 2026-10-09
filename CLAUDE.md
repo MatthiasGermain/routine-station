@@ -30,7 +30,8 @@ ajoute une section, elle ne remplace rien.
   plein jour, il ne distinguait pas une flamme du soleil (décision 0008)
 - **Actions** : moteur pas-à-pas 28BYJ-48 via driver ULN2003, LED, buzzer
 - **Ordres depuis le web** : faire tourner / arrêter le moteur, déclencher /
-  couper l'alarme, régler des seuils
+  couper l'alarme, régler le seuil d'alerte de température (alerte de
+  supervision : LED bleue intégrée et événement, pas un arrêt d'urgence)
 - **Temps réel** : si l'arrêt d'urgence est touché, alarme + arrêt moteur
   immédiats, même si le Wi-Fi ou le broker sont indisponibles. Il reste
   verrouillé jusqu'à un appui long de 2 s sur le module, **jamais réarmé depuis
@@ -89,7 +90,8 @@ README.md / README.fr.md   README bilingue (anglais principal, français en miro
 platformio.ini             configuration de la carte et de la chaîne de compilation
 include/pins.h             toutes les broches au même endroit
 src/                       un module par responsabilité, à plat :
-                           sensors, motor, alarm, network, messages, commands
+                           sensors, motor, alarm, temperature_alert, network,
+                           messages, commands
                            (+ main.cpp)
 docs/protocol.md           contrat ESP32 <-> web (topics MQTT, JSON), référence
                            commune avec le repo du site

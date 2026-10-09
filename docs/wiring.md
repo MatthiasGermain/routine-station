@@ -150,7 +150,7 @@ distinguait pas une flamme de la lumière du soleil
 
 | Élément | GPIO | Nom sur la carte | Étape |
 |---------|------|------------------|-------|
-| LED intégrée | 2 | — | 0 |
+| LED intégrée (alerte de température depuis l'étape 5) | 2 | — | 0 |
 | LM35 | 34 | D34 | 1 |
 | Photorésistance | 35 | D35 | 1 |
 | ULN2003 IN1 | 19 | D19 | 1 |
