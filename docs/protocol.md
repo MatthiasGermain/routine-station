@@ -17,7 +17,9 @@ Broker : **EMQX Serverless**, offre gratuite, région Europe (Francfort)
 | WebSocket sur TLS (`wss://<adresse>:8084/mqtt`) | 8084 | la page, dans le navigateur |
 
 - **Adresse du broker** : dans `include/secrets.h` pour la station, dans les
-  variables d'environnement Vercel pour le site. Elle n'est pas un secret au
+  variables d'environnement Vercel pour le site (pour la page :
+  `PUBLIC_STATION_MQTT_URL`, l'adresse WebSocket complète, avec
+  `PUBLIC_STATION_MQTT_USERNAME` et `PUBLIC_STATION_MQTT_PASSWORD`). Elle n'est pas un secret au
   sens strict (la page l'exposera dans le navigateur), mais elle n'est pas
   publiée dans le dépôt pour ne pas inviter les tentatives de connexion.
 - **TLS obligatoire**, et le certificat du broker est **vérifié** : l'ESP32
@@ -36,7 +38,11 @@ Broker : **EMQX Serverless**, offre gratuite, région Europe (Francfort)
 
 - Le mot de passe de `web-viewer` finit forcément dans le code JavaScript de la
   page, donc il faut le considérer comme **public** : c'est pour ça que cet
-  utilisateur ne peut rien publier.
+  utilisateur ne peut rien publier. Créé à l'étape 4 et vérifié dans MQTT
+  Explorer : il reçoit les quatre topics, et une commande publiée avec lui
+  n'atteint pas la station.
+- `web-viewer` s'abonne **topic par topic** : un filtre plus large (`#`,
+  `routine/station/#`) dépasse ses droits et le broker le refuse.
 - Le mot de passe de `web-command` ne quitte jamais le serveur Vercel.
 - Les droits sont des règles d'autorisation EMQX, en liste blanche : une règle
   « tous les utilisateurs : `#`, publication et abonnement : refusé », puis une
@@ -192,3 +198,8 @@ Topic `routine/station/status`, retenu, QoS 1.
   45 secondes plus tard, faute de nouvelles d'elle (1,5 fois le *keep-alive*
   de 30 s).
 - Une page qui s'ouvre reçoit donc tout de suite le dernier état connu.
+- **Côté page**, la station est affichée hors ligne si `status` vaut
+  `{"online": false}`, ou si la dernière mesure date de plus de 15 s (trois
+  mesures manquées) : sans attendre les 45 s du testament. Une mesure retenue
+  est datée par son champ `time`, une mesure reçue en direct par son heure
+  d'arrivée.

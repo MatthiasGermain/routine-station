@@ -8,12 +8,17 @@ qu'une page web les affiche en direct et renvoie des ordres. Quand on touche
 l'arrêt d'urgence, l'alarme et l'arrêt du moteur sont gérés sur la carte en
 temps réel, avec ou sans réseau.
 
-**État :** étape 3 sur 6 terminée (connectée en MQTT et TLS). Voir la
-[feuille de route](#feuille-de-route).
+**État :** étape 4 sur 6 terminée (la station est en direct sur le site). Voir
+la [feuille de route](#feuille-de-route).
 
 ## Démo
 
-_La page en ligne arrive à l'étape 4, le GIF de démo à l'étape 6._
+La station en direct : [matthias-germain.vercel.app/routine](https://matthias-germain.vercel.app/routine)
+(vue publique, en lecture seule ; [en anglais](https://matthias-germain.vercel.app/en/routine)).
+
+![La page /routine publique, avec la station en direct](docs/assets/04-page-en-direct.png)
+
+_Le GIF de démo arrive à l'étape 6._
 
 ## Architecture
 
@@ -66,10 +71,11 @@ _Rempli au fil des étapes._ Le plan :
 
 - Le firmware échantillonne les capteurs, pilote le moteur et publie les mesures
   en MQTT.
-- La page `/routine` s'abonne à ces mesures et les affiche en direct.
+- La page `/routine` s'abonne à ces mesures avec un utilisateur MQTT en
+  lecture seule et les affiche en direct (étape 4).
 - Les commandes (démarrer ou arrêter le moteur, déclencher ou couper l'alarme,
-  régler des seuils) partent de la page, passent par une route API protégée,
-  puis par le broker, jusqu'à l'ESP32.
+  régler des seuils) partiront de la page, passeront par une route API protégée,
+  puis par le broker, jusqu'à l'ESP32 (étape 5).
 
 Les topics MQTT et les messages JSON sont spécifiés dans
 [docs/protocol.md](docs/protocol.md) (rempli à l'étape 3). C'est la référence
@@ -125,14 +131,15 @@ de la flamme et la méthode d'enregistrement et de rejeu sont dans le
 
 ## Modèle de sécurité
 
-_Mis en place aux étapes 3 et 5._ La conception :
+_Mis en place aux étapes 3 à 5._ La conception :
 
 - Le broker a trois utilisateurs, chacun limité à ses propres topics : la
-  station, un en lecture seule utilisé par la page publique, et un de commande
-  utilisé uniquement par une route API côté serveur.
-- La route API vérifie que le propriétaire est connecté (Auth.js, connexion
-  GitHub limitée à un seul compte) et valide chaque commande : type autorisé,
-  valeurs dans les bornes.
+  station (étape 3), un en lecture seule utilisé par la page publique (étape 4),
+  et un de commande utilisé uniquement par une route API côté serveur (étape 5).
+- La route API vérifie que le propriétaire est connecté et valide chaque
+  commande : type autorisé, valeurs dans les bornes. Depuis l'étape 4, la partie
+  propriétaire de `/routine` est derrière une session à mot de passe ; reste à
+  décider à l'étape 5 si cette même session protège les commandes.
 - L'ESP32 valide à nouveau chaque commande et communique avec le broker en TLS.
 - Aucun secret n'est commité : le vrai fichier de configuration est ignoré par
   git et un fichier exemple est commité à sa place.
@@ -148,8 +155,9 @@ _Mis en place aux étapes 3 et 5._ La conception :
   flamme, remplacé après l'étape 3 par un arrêt d'urgence tactile
 - [x] **Étape 3, broker cloud** : Wi-Fi, MQTT en TLS, reconnexion automatique,
   envoi des mesures, réception des commandes (`v0.3-mqtt`)
-- [ ] **Étape 4, page `/routine` en direct** : dans le dépôt du site
-  (`v0.4-live-page`)
+- [x] **Étape 4, page `/routine` en direct** : dans le dépôt du site ; la
+  station en direct dans une vue publique en lecture seule, le tableau de bord
+  du propriétaire derrière un mot de passe (`v0.4-live-page`)
 - [ ] **Étape 5, commandes depuis le web** : route API protégée par login
   (`v0.5-commands`)
 - [ ] **Étape 6, finition** : README complet, schéma de câblage, GIF de démo,

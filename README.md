@@ -8,12 +8,17 @@ live and sends commands back. When someone touches the emergency stop, the
 alarm and the motor stop are handled on the board in real time, with or without
 a network.
 
-**Status:** step 3 of 6 done (connected over MQTT and TLS). See the
+**Status:** step 4 of 6 done (the station is live on the website). See the
 [roadmap](#roadmap).
 
 ## Demo
 
-_The live page arrives at step 4, the demo GIF at step 6._
+The station, live: [matthias-germain.vercel.app/routine](https://matthias-germain.vercel.app/routine)
+(public, read-only view; [in English](https://matthias-germain.vercel.app/en/routine)).
+
+![The public /routine page showing the station live](docs/assets/04-page-en-direct.png)
+
+_The demo GIF arrives at step 6._
 
 ## Architecture
 
@@ -66,10 +71,11 @@ _Filled in as the steps land._ The plan:
 
 - The firmware samples the sensors, drives the motor and publishes measurements
   over MQTT.
-- The `/routine` page subscribes to those measurements and displays them live.
+- The `/routine` page subscribes to those measurements with a read-only MQTT
+  user and displays them live (step 4).
 - Commands (start or stop the motor, trigger or silence the alarm, set
-  thresholds) go from the page through a protected API route to the broker, then
-  to the ESP32.
+  thresholds) will go from the page through a protected API route to the broker,
+  then to the ESP32 (step 5).
 
 The MQTT topics and JSON payloads are specified in
 [docs/protocol.md](docs/protocol.md) (in French, filled in at step 3). It is the
@@ -123,14 +129,15 @@ measurements and the capture-and-replay method are in the
 
 ## Security model
 
-_Implemented at steps 3 and 5._ The design:
+_Implemented at steps 3 to 5._ The design:
 
-- The broker has three users, each restricted to its own topics: the station,
-  a read-only one used by the public page, and a command one used only by a
-  server-side API route.
-- The API route checks that the owner is logged in (Auth.js, GitHub login
-  restricted to one account) and validates every command: allowed type, values
-  within bounds.
+- The broker has three users, each restricted to its own topics: the station
+  (step 3), a read-only one used by the public page (step 4), and a command one
+  used only by a server-side API route (step 5).
+- The API route checks that the owner is logged in and validates every command:
+  allowed type, values within bounds. Since step 4, the owner side of `/routine`
+  sits behind a password session; whether the same session protects the
+  commands is decided at step 5.
 - The ESP32 validates every command again and talks to the broker over TLS.
 - No secret is committed: the real configuration file is git-ignored and an
   example file is committed in its place.
@@ -146,8 +153,9 @@ _Implemented at steps 3 and 5._ The design:
   after step 3 by a touch emergency stop
 - [x] **Step 3, cloud broker**: Wi-Fi, MQTT over TLS, automatic reconnection,
   measurements out, commands in (`v0.3-mqtt`)
-- [ ] **Step 4, live `/routine` page**: in the website repository
-  (`v0.4-live-page`)
+- [x] **Step 4, live `/routine` page**: in the website repository; the
+  station live in a public, read-only view, the owner dashboard behind a
+  password (`v0.4-live-page`)
 - [ ] **Step 5, commands from the web**: API route protected by login
   (`v0.5-commands`)
 - [ ] **Step 6, polish**: complete README, wiring diagram, demo GIF, wrap-up
