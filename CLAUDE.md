@@ -150,4 +150,5 @@ Touches dans le moniteur série (firmware depuis l'étape 2) :
 
 - `s` : active ou coupe l'expérience « `loop()` bloquée 500 ms à chaque tour ».
 - `n` (depuis l'étape 3) : coupe le Wi-Fi de l'ESP32 pendant 60 s, comme une
-  panne réseau, puis le laisse se reconnecter seul.
+  panne réseau, puis le laisse se reconnecter seul. Ignorée si une coupure
+  est déjà en cours.

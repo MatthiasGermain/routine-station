@@ -62,6 +62,12 @@ const uint16_t MQTT_BUFFER_BYTES = 512;
 // 30 s between tries, the station once needed more than 3 minutes.
 const unsigned long WIFI_NUDGE_MS = 10000;
 
+// After this many network failures in a row towards the broker while the Wi-Fi
+// looks connected, restart the Wi-Fi connection: the station joins the network
+// again and asks the box for a new DHCP lease, with its DNS server. Once, the
+// station stayed stuck for minutes on "DNS Failed", Wi-Fi up, until a reset.
+const int BROKER_FAILURES_BEFORE_WIFI_RESTART = 3;
+
 // Clock: UTC, from public NTP servers.
 const char NTP_SERVER_1[] = "pool.ntp.org";
 const char NTP_SERVER_2[] = "time.google.com";
@@ -80,6 +86,7 @@ unsigned long lastAttemptMs = 0;
 bool firstAttempt = true;
 unsigned long wifiDownSinceMs = 0;
 unsigned long connectedAtMs = 0;
+int brokerFailures = 0;  // network failures in a row, see connectBroker()
 
 // Simulated network outage (networkSimulateOutage()).
 bool outage = false;
@@ -124,12 +131,23 @@ void connectBroker() {
     retryDelayMs = min(retryDelayMs * 2, RETRY_MAX_MS);
     Serial.printf(">>> MQTT: failed after %lu ms (state %d), next try in %lu s\n",
                   durationMs, mqtt.state(), retryDelayMs / 1000);
+
+    // A refusal by the broker proves the network works: only network
+    // failures count towards a Wi-Fi restart.
+    if (mqtt.state() < 0 &&
+        ++brokerFailures >= BROKER_FAILURES_BEFORE_WIFI_RESTART) {
+      Serial.printf(">>> Wi-Fi: broker unreachable %d times in a row, "
+                    "restarting the Wi-Fi connection\n", brokerFailures);
+      brokerFailures = 0;
+      WiFi.reconnect();
+    }
     return;
   }
 
   Serial.printf(">>> MQTT: connected in %lu ms\n", durationMs);
   connectedAtMs = millis();
   retryDelayMs = RETRY_MIN_MS;
+  brokerFailures = 0;
   mqtt.publish(TOPIC_STATUS, STATUS_ONLINE, true);
   mqtt.subscribe(TOPIC_COMMANDS, 1);
 }
@@ -228,6 +246,10 @@ void networkUpdate() {
 }
 
 void networkSimulateOutage(uint32_t seconds) {
+  if (outage) {
+    Serial.println(">>> simulated outage already running, ignored");
+    return;
+  }
   // The radio goes off without a word to the broker, like a real outage: the
   // broker only notices through the keep-alive and publishes the Last Will.
   WiFi.mode(WIFI_OFF);

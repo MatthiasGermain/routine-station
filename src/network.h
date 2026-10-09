@@ -3,6 +3,8 @@
 //
 // Reconnects by itself: the Wi-Fi driver retries on its own, and the broker
 // connection is retried with growing delays (2 s, 4 s, 8 s... up to 60 s).
+// After 3 network failures in a row towards the broker, the Wi-Fi connection
+// is restarted, in case the trouble is on the local network side (DNS).
 // loop() is only blocked while connecting to the broker (a few seconds, under
 // 30 s when the network does not answer): the alarm and the motor run
 // in their own tasks and do not depend on it.
@@ -26,7 +28,8 @@ void networkBegin(CommandHandler onCommand);
 void networkUpdate();
 
 // Test helper: turns the Wi-Fi off for `seconds`, then lets the station
-// reconnect by itself, to check the behavior during an outage.
+// reconnect by itself, to check the behavior during an outage. Ignored while
+// a simulated outage is already running.
 void networkSimulateOutage(uint32_t seconds);
 
 NetworkState networkState();
